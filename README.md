@@ -3,6 +3,9 @@
 Common operations for REST API schema translation.
 
 
+## TODO:
+  - [ ] Is it possible to get field definitions of a query object? YES -> query.select, query.
+
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
