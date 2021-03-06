@@ -1,10 +1,21 @@
 # ApiCommons
 
-Common operations for REST API schema translation.
+Common operations for fast REST API development and documentation.
 
 
-## TODO:
+## Roadmap/Ideas:
   - [ ] Is it possible to get field definitions of a query object? YES -> query.select, query.
+  - [ ] Use Plugs to generate complete endpoint?
+  - [ ] Auto-generate openAPI spec/html
+  - [ ] Create ability to dump generated documentation, server over endpoint.
+  - [ ] Auto-generate view 
+
+
+
+  ```elixir
+    # Check wether parameter of a specific struct
+    def takesStruct(struct = %StructTest{}) do
+  ```
 
 ## Installation
 

@@ -1,5 +1,9 @@
 defmodule ApiCommons.Schema do
 
+    @moduledoc """
+        
+    """
+
     @doc """
 
     """

@@ -1,5 +1,7 @@
 defmodule ApiCommons do
   
+  alias ApiCommons.Schema.Field
+
   @moduledoc """
     Functions and Macros for quick REST API endpoint generation.
   """
@@ -16,6 +18,7 @@ defmodule ApiCommons do
     #### params
       - paginate (integer|nil) Wether or not to paginate over the items
       - sort (map) %{desc: :field_name} or %{asc: :field_name} 
+      - exclude (list[atom]) List of field name as atoms, which to skip for json generation
       - 
 
     Returns: Map representing the ressource
@@ -27,10 +30,32 @@ defmodule ApiCommons do
 
   def render(:show, schema, values, params) do
 
+    # Need to check wether values are valid changeset or not
+
     field_names = schema.__schema__(:fields)
     base_resource = %{}
 
+    # MapSet for faster lookup
+    skip_values = if params[:skip] do
+      MapSet.new(params[:skip])
+    end
+
+    # For each field name perform transformation & add to ressource information
+    for field_name <- field_names do
+
+      # Skip specific field?
+      if Field.exclude?(field_name, params[:skip]) do
+        new_field_name = Field.rename(field_name, params[:rename])
+        # TODO: Check wether resulting field is no unloaded assoc or another map
+
+        # Map.put(base_resource, new_field_name, )
+      end
+    end
+
   end
+
+
+
 
 
 
