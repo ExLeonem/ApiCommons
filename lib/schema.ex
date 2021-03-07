@@ -12,7 +12,6 @@ defmodule ApiCommons.Schema do
     end
 
 
-
     @doc """
         Use an ecto schema as a base for generation of a
     """

@@ -1,5 +1,4 @@
 defmodule ApiCommons do
-  
   alias ApiCommons.Schema.Field
 
   @moduledoc """
