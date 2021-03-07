@@ -1,8 +1,10 @@
 defmodule ApiCommons.Endpoint.Parameter do
 
-    @moduledoc """
-        Handle parameters in path & body. Provide checks for availability and values.
-    """
+        @moduledoc """
+            Handle parameters in path & body. Provide checks for availability and values.
+        """
+
+    @check_defaults %{position: :path, required?: true, default: nil, type: nil, }
 
     @doc """
         Check wether or not the given parameter is provided as
@@ -15,28 +17,41 @@ defmodule ApiCommons.Endpoint.Parameter do
 
 
         ### Params:
-            - position (atom) One value of [:path, :query], indicates the position of the parameter. Defaults to (:path)
+            - position (atom) One value of [:path, :query, :body], indicates the position of the parameter. Defaults to (:path)
             - required? (boolean) Wether or not the parameter to check is required. Defaults to (:false)
-            - default: (any()) The default value for given parameter, will only be applied if no value is provided for an optional parameter.
-            - 
+            - default (any()) The default value for given parameter, will only be applied if no value is provided for an optional parameter.
+            - type (any()) The parameter type used to check. 
+            - error (fn()) A function that takes an atom of type [:type, :length]
 
-        
+        ## Examples
     """
-    def check(conn, paramter_name, params) do
+
+    def check(conn, parameter_name, params) do
+        # BODY PARAMETERS can be found in conn.body_params
+        # QUERY PARAMETERS can be foun din conn.query_params
+
+
+        # Is conn a Plug.Conn or a Parameter.
+    end
+
+    def check(conn, paramter_name, type \\ :required, params) do
+
+    end
+
+    def check(conn, parameter_name, type \\ :required, position \\ :path, params) do
 
     end
 
 
 
-    defmodule Validity do
+    defmodule Check do
         @moduledoc """
             Similar to Ecto.Changeset. Collects information on valid and invalid parameters passed to the endpoint.
             Collect information on validity of endpoint parameter check ups.
 
-
             - valid? - Are the provided parameters are valid?
             - action - The next action to be performed
-            - 
+            - errors - The errors accumulated while checking the parameters
         """
 
         defstruct [:valid?, :action, :errors]
@@ -53,11 +68,10 @@ defmodule ApiCommons.Endpoint.Parameter do
 
 
 
-    defmodule Error do
+    defmodule ErrorParse do
         @moduledoc """
-            Parse 
+            Parse invalid parameters to output anoutput message or  
         """
-
     end
 
 

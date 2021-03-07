@@ -71,7 +71,7 @@ defmodule ApiCommons.Endpoint do
 
 
     @doc """
-        Generate an endpoint to create new ressources.
+        Generate an endpoint to cereate new ressources.
     """
     defmacro create() do
         # BODY PARAMETERS can be found in conn.body_params

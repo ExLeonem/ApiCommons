@@ -6,6 +6,14 @@ defmodule ApiCommons do
   """
 
   @doc """
+      Use an ecto schema as a base for generation of a
+  """
+  defmacro schema(ecto_schema, params \\ %{}) do
+
+  end
+  
+
+  @doc """
     Perform renders of ecto schemas to map.
 
     ### Parameter
@@ -53,12 +61,6 @@ defmodule ApiCommons do
 
   end
 
-
-
-
-
-
-
   @doc """
     Link single schema to another
   """
@@ -74,7 +76,6 @@ defmodule ApiCommons do
     # Item |> link_multi([Store, ItemImage]) # Need to check for many, belongs_to, one assocs
 
   end
-
 
 
   @doc """

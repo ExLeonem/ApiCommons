@@ -4,18 +4,12 @@ defmodule ApiCommons.Schema do
         
     """
 
-    @doc """
-
-    """
-    def to_json(values, schema, params) do
-
-    end
 
 
     @doc """
-        Use an ecto schema as a base for generation of a
+        
     """
-    defmacro schema(ecto_schema, params \\ %{}) do
-
+    def as_json(values, schema, params) do
+        
     end
 end

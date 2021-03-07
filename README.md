@@ -1,14 +1,33 @@
 # ApiCommons
 
-Common operations for fast REST API development and documentation.
+[![Coverage Status](https://coveralls.io/repos/github/ExLeonem/ApiCommons/badge.svg?branch=master)](https://coveralls.io/github/ExLeonem/ApiCommons?branch=master)
+[![Build Status](https://travis-ci.com/ExLeonem/ApiCommons.svg?branch=master)](https://travis-ci.com/ExLeonem/ApiCommons)
+
+<!-- Common operations for fast REST API development and documentation. -->
+
+Development of REST API is tedious, even though there are reccurant things that need to be done.
+This library is an attempt to increase the speed in which REST APIs can be developed.
 
 
-## Roadmap/Ideas:
-  - [ ] Is it possible to get field definitions of a query object? YES -> query.select, query.
-  - [ ] Use Plugs to generate complete endpoint?
-  - [ ] Auto-generate openAPI spec/html
-  - [ ] Create ability to dump generated documentation, server over endpoint.
-  - [ ] Auto-generate view 
+## Index 
+1. [Roadmap](#Roadmap)
+2. [Installation](#Installation)
+3. [Dependencies](#Dependencies)
+4. [Examples](#Examples)
+5. [Contribution](#Contribution)
+
+
+## Roadmap
+- [ ] Provide functions to check parameters to endpoint
+- [ ] Provide functions to construct a return value for the endpoint
+
+- [ ] Auto generation of endpoints via DSL/macro usage
+  - [ ] Common operations create, index, show, delete, update
+  - [ ] Auto generate view functions
+
+- [ ] Auto-Generate OpenAPI file from DSL usage
+- [ ] Auto-Generate HTML API Documentation
+- [ ] Plug to sync OpenAPI definition and DSL definitions?
 
 
 
@@ -33,4 +52,14 @@ end
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/api_commons](https://hexdocs.pm/api_commons).
+
+
+
+## Dependencies
+
+
+## Examples
+
+
+## Contribution
 
