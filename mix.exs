@@ -7,7 +7,8 @@ defmodule ApiCommons.MixProject do
       version: "0.1.0",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 
@@ -26,7 +27,7 @@ defmodule ApiCommons.MixProject do
 
       
       {:ecto_sql, "~> 3.4", only: :test},
-      {:excoveralls, "~> 0.14.0", only: :dev}
+      {:excoveralls, "~> 0.14.0", only: :test}
     ]
   end
 end
