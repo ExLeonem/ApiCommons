@@ -25,7 +25,8 @@ defmodule ApiCommons.MixProject do
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
 
       
-      {:ecto_sql, "~> 3.4", only: :test}
+      {:ecto_sql, "~> 3.4", only: :test},
+      {:excoveralls, "~> 0.14.0", only: :dev}
     ]
   end
 end

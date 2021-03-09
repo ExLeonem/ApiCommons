@@ -18,6 +18,8 @@ defmodule ApiCommons.Schema.Field do
 
         ## Examples
 
+        iex> require ApiCommons.Schema.Field
+
         iex> ApiCommons.Schema.Field.rename(:old_field_name, %{old_field_name: :new_field_name})
         :new_field_name
 
@@ -48,6 +50,8 @@ defmodule ApiCommons.Schema.Field do
         Returns: true | false indicating wether the current field should be skipped
 
         ## Examples
+
+        iex> require ApiCommons.Schema.Field
 
         iex> ApiCommons.Field.exclude?(:article_id, [:article_id, :comment_id])
         true
