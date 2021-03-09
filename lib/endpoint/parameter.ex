@@ -38,9 +38,9 @@ defmodule ApiCommons.Endpoint.Parameter do
 
     end
 
-    def check(conn, parameter_name, type \\ :required, position \\ :path, params) do
+    # def check(conn, parameter_name, type \\ :required, position \\ :path, params) do
 
-    end
+    # end
 
 
 
