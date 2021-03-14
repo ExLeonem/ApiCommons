@@ -1,6 +1,7 @@
 defmodule ApiCommons.Schema.FieldTest do
     use ExUnit.Case
-    doctest ApiCommons.Schema.Field
+    # doctest ApiCommons.Schema.Field
+
     alias ApiCommons.Schema.Field
 
     @field_map %{

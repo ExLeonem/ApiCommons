@@ -28,6 +28,8 @@ defmodule ApiCommons.Endpoint do
 
     end
 
+    
+
 
     @doc """
         Define a parameter for a specific restful operation. 

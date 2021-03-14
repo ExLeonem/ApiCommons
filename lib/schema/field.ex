@@ -6,6 +6,16 @@ defmodule ApiCommons.Schema.Field do
         Functions to transform specific struct of Ecto.Schema into a regular map format.
     """
 
+
+    @doc """
+        Optional fields are cast to a specific type or return a value
+    """
+    def optional(field, value, type) do
+        
+    end
+
+
+
     @doc """
         Rename a field name.
 

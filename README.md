@@ -5,8 +5,14 @@
 
 <!-- Common operations for fast REST API development and documentation. -->
 
-Development of REST API is tedious, even though there are reccurant things that need to be done.
-This library is an attempt to increase the speed in which REST APIs can be developed.
+Development of a REST API is tedious. Use your ecto schemes to generate endpoints quicker.
+
+
+[Mongoose-rest-api](https://www.npmjs.com/package/mongoose-rest-api)
+
+<!-- Transform your ecto schemes into  -->
+<!-- even though there are reccurant things that need to be done.
+This library is an attempt to increase the speed in which REST APIs can be developed. -->
 
 
 ## Index 
@@ -28,6 +34,7 @@ This library is an attempt to increase the speed in which REST APIs can be devel
 - [ ] Auto-Generate OpenAPI file from DSL usage
 - [ ] Auto-Generate HTML API Documentation
 - [ ] Plug to sync OpenAPI definition and DSL definitions?
+- [ ] Adding option for configuration to map errors
 
 
 
