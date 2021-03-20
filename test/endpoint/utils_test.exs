@@ -49,4 +49,17 @@ defmodule ApiCommons.Endpoint.UtilsTest do
 
     end
 
+    describe "cast/2 ::" do
+
+        test "of :id, " do
+
+        end
+
+
+        test "of " do
+
+        end
+
+    end
+
 end

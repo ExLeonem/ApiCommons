@@ -3,6 +3,16 @@ defmodule ApiCommons.Endpoint.ParameterTest do
 
     alias ApiCommons.Endpoint.Parameter
 
+    @valid %{
+        name: "test",
+        counter: 2,
+        rating: 2.2,
+        exists?: false,
+        image: <<1>>,
+        start_at: Time.new(8, 0, 0),
+        end_at: Time.new(12, 0, 0)
+    }
+
 
     # Schema for test purposes
     defmodule TestSchema do
@@ -40,7 +50,14 @@ defmodule ApiCommons.Endpoint.ParameterTest do
 
     describe "like_schema/3 ::" do
         
-        test "" do
+        test "Invalid parameters, missing keys" do
+            values = Map.drop(@valid, [:name])
+            parameters = Parameter.like_schema(values, TestSchema)
+            refute parameters.valid?
+        end
+
+
+        test "Missing associations" do
             
         end
     end

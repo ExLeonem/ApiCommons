@@ -3,6 +3,8 @@ defmodule ApiCommons.Endpoint.Utils do
             Utils useable for parameter checks.
         """
 
+        require Logger
+
         @ecto_types [:id, :binary_id, :integer, :float, :boolean, :string, :binary, :map, :decimal, ]
 
         @doc """
@@ -12,62 +14,35 @@ defmodule ApiCommons.Endpoint.Utils do
                 - field_value (any) Any value to check against
                 - type (Ecto.Type) Field type primitives to check for
         """
-        def is_type(field_value, type) when type in [:id, :integer]  do
-            Integer.parse()
-        end
-
-        def is_type(field_value, :binary_id) do
-            # Elixir binary
-        end
-        
-        def is_type(field_value, :binary) do
-            # Elixir 
-        end
-
-        def is_type(field_value, :integer) when is_integer(field_value) do
-            
-        end
-        def is_type(field_value, :integer) do
-            # elixir integer
-        end
-
-        def is_type(field_value, :float) do
-            # Elixir float
-        end
-
-        def is_type(field_value, :boolean) do
-
-        end
-
-        def is_type(field_value, :string) do
-
-        end
-
-        # def is_type() do
-            
-        # end
-
-        def is_type(field_value, :schema) do
-
-        end
-
         def is_type(field_value, type) do
-
+            case cast(field_value, type) do
+                :cast_error -> false
+                _ -> true
+            end
         end
 
 
         @doc """
-            Cast value of a paramter to a specific type.
+            Cast value of a paramter to a specific type. 
+            If value already of specified type, just return the value
 
             ## Parameter
                 - value (any) The value to parse
                 - type (atom) One of following values [:id, :integer, :float, ...]. Representing the type to parse to
 
             ## Returns
+                - The casted value or an error code {error_type, code}
 
             ## Examples
 
         """ 
+
+         def cast(value, _) when value in [[], {}, %{}, nil] do
+            # Empty value
+            :empty
+        end
+
+        def cast(value, type) when type in [:id, :integer] and is_integer(value), do: value
         def cast(value, type) when type in [:id, :integer] do
             case Integer.parse(value) do
                 {parsed_value, _} -> parsed_value
@@ -75,6 +50,7 @@ defmodule ApiCommons.Endpoint.Utils do
             end
         end
 
+        def cast(value, :float) when is_float(value), do: value
         def cast(value, :float) do
             case Float.parse(value) do
                 {parsed_value, _} -> parsed_value
@@ -82,6 +58,7 @@ defmodule ApiCommons.Endpoint.Utils do
             end
         end
 
+        def cast(value, :boolean) when is_boolean(value), do: value
         def cast(value, :boolean) do
             truthy_atom = String.to_atom(value)
             case truthy_atom do
@@ -91,14 +68,44 @@ defmodule ApiCommons.Endpoint.Utils do
             end
         end
 
+        def cast(value, :binary) when is_binary(value), do: value
+        def cast(value, :binary) do
+            Logger.warn("Failed casting binary")
+            :cast_error
+        end
+
         def cast(value, {:array, inner_type}) when is_list(value) do
             Enum.map(value, fn x -> cast(x, inner_type) end)
         end
         def cast(_value, {:array, _inner_type}), do: :cast_error
 
+        def cast(value, :map) when is_map(value), do: value
         def cast(value, :map) do
             
         end
+
+        def cast(value, {:map, mappings}) do
+            # Cast map of values to a specific type
+        end
+
+        def cast(value, {:list, type}) do
+            # Cast list of values to a specific type
+        end
+
+        def cast(value, :string) do
+            # Values received are usually are strings
+            value
+        end
+
+
+        def cast(value = %Time{}, type) when type in [:time, :time_usec] , do: value
+        def cast(value, type) when is_bitstring(value) and type in [:time, :time_usec]  do
+            case Time.from_iso8601(value) do
+                {:ok, time} -> time
+                {:error, error_code} -> error_code
+            end
+        end
+        def cast(value, type) when type in [:time, :time_usec], do: :wrong_type
 
 
         # Check wether field should be excluded

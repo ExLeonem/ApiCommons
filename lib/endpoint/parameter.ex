@@ -2,7 +2,10 @@ defmodule ApiCommons.Endpoint.Parameter do
 
     @moduledoc """
         Handle parameters in path & body. Provide checks for availability and values.
+        Parse parameters passed to endpoint calls into a processable format.
     """
+
+    require Logger
 
     alias ApiCommons.Endpoint.Utils
     alias ApiCommons.Endpoint.Parameter.Check
@@ -72,6 +75,15 @@ defmodule ApiCommons.Endpoint.Parameter do
     end
 
 
+    def default_params(type)
+    def default_params(:load) do
+        %{
+            exclude: [],
+            depth: 2,
+            
+        }
+    end
+
     @doc """
         Check the received parameters against an Ecto.Schema.
         All fields of the schema by default are required, optional fields need to be marked.
@@ -79,77 +91,139 @@ defmodule ApiCommons.Endpoint.Parameter do
         TODO: 
             - Take required?/optional from the schema definition?
             - [References for development](https://github.com/elixir-ecto/ecto/blob/master/lib/ecto/schema.ex)
+            - Use error information provided by changeset function?
 
         ## Parameter
 
         ## Opts
-            - position (atom) One of [:body, :path, :query], indicating where to take the parameter from
+            - position (atom) One of [:body, :path, :query, :all], indicating where to take the parameter from
             - exclude (list(atom)) A list of parameter names as atoms to exclude
             - optional (list(atom)) A list of parameter names as atoms to mark as optional
-            - preload (list(Ecto.Schema)) A list of Ecto.Schemas for preloads
-            - depth (integer) The maximum depth to which to resolve associations
+            - endpoint (preload) Set parsing of associations in preload mode. Meaning only keys are required as input by default
+            - depth (integer) The maximum depth to which to resolve associations (default: 2)
             - 
 
         ## Examples
     """
-    def like_schema(received, ecto_schema, opts) do
+    def like_schema(received, ecto_schema, opts \\ %{exclude: [], optional: [], depth: 2, endpoint: :load}) do
 
         # Parameters after processing
         parsed_params = %Check{data: received, schema: ecto_schema, opts: opts}
         |> resolve_fields()
-        |> resolve_assoc()
+        |> resolve_assocs()
     end
 
 
     @doc """
         Resolve fields of a schema
-    """
-    defp resolve_fields(checks = %Check{data: received, schema: ecto_schema, opts: opts}) do
 
+        TODO: Use preload key to ignore all keys except id
+    """
+    defp resolve_fields(checks = %Check{schema: ecto_schema}) do
+        # Collect parse regular fields of schema
+        ecto_schema.__schema__(:fields)
+        |> resolve_fields(checks)
+    end
+
+
+    @doc """
+        Read information about ecto schema fields.
+
+        ## Parameters
+            - 
+
+        ## Examples
+            - 
+
+        ## Returns
+            - 
+    """
+    defp resolve_fields([], checks), do: checks
+    defp resolve_fields([field | next_fields], checks = %Check{data: data, schema: ecto_schema, opts: opts}) do
         to_exclude = opts[:exclude]
         is_optional = opts[:optional]
 
-        # Collect parse regular fields of schema
-        field_names = ecto_schema.__schema__(:fields)
-        for field <- field_names do
-
-            cond do
-                Utils.includes?(to_exclude, field) -> nil
-                Utils.includes?(is_optional, field) -> 
-                    # Optional field
-                    nil
-                true -> 
-                    field_type = ecto_schema.__schema__(:type, field)
-                    value = received[field]
+        checks = cond do
+            Utils.includes?(to_exclude, field) -> checks
+            true -> 
+                optional? = Utils.includes?(is_optional, field)
+                field_type = ecto_schema.__schema__(:type, field)
+                value = data[field] 
                     |> Utils.cast(field_type)
 
-                    checks = Check.update(field, value)
-            end
+                Check.update(field, value, checks, optional?: optional?)
         end
 
-        checks
+        resolve_fields(next_fields, checks) 
     end
+
 
 
     @doc """
         Resolve an assocation to be included into a
     """
-    defp resolve_assoc(checks = %Check{data: received, schema: ecto_schema, opts: opts}) do
-
-        preloads = opts[:preload]
-        to_exclude = opts[:exclude]
-        is_optional = opts[:optional]
+    defp resolve_assocs(checks = %Check{schema: ecto_schema}) do
     
         # Collect information from associated
-        assocs = ecto_schema.__schema__(:associations)
-        for preload <- preloads do
-
-            if Utils.includes?(assocs, preload) do
-                
-            end
-        end 
+        ecto_schema.__schema__(:associations)
+        |> resolve_assocs(checks)
     end
 
+    @doc """
+
+    """
+    defp resolve_assocs([], checks), do: checks
+    defp resolve_assocs([assoc | next_assocs], checks=%Check{data: data, schema: ecto_schema, opts: opts}) do
+        to_exclude = opts[:exclude]
+        is_optional = opts[:optional]
+
+
+        Logger.info("Preload #{preloads}")
+        cond do
+            Utils.includes?(to_exclude, assoc) -> nil
+            true ->
+                assoc_refletion = ecto_schema.__schema__(:associations, assoc)
+                related_schema = assoc_reflection[:related]
+
+                # Check params against association schema
+                field = assoc_reflection[:field]
+                assoc_data = data[field]
+                related_schema_fields = related_schema.__schema__(:fields)
+                new_checks = resolve_fields(related_schema_fields, %Check{data: assoc_data, schema: related_schema, opts: opts})
+                
+                # Check wether schema valid
+                optional? = Utils.includes?(is_optional, assoc)
+                checks = merge_assoc_checks(new_checks, checks, optional?: optional?, join: field)
+        end
+
+        resolve_assocs(next_assocs, checks)
+    end
+
+
+    @doc """
+        
+
+        ## Parameter
+            - from_check (Check) Struct to be merged in the other struct
+            - to_check (Check) The struct to be merged into
+            - opts (Map) Additional options passed
+
+        ## Options
+            - join (atom) The field used to join the two check structs
+    """
+    defp merge_assoc_checks(from_check, to_check, opts \\ %{}) do
+        
+        from_parsed = from_check[:parsed]
+        cond do
+            assoc_check.valid? -> 
+                new_parsed = Map.put(to_check.parsed, opts[:join], from_parsed)
+                %{to_check | parsed: new_parsed}
+
+            true ->
+                # First assoc check failed, save errors under join key
+                
+        end
+    end
 
 
     @doc """
