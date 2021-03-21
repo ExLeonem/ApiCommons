@@ -52,7 +52,7 @@ defmodule ApiCommons.Endpoint.Parameter.Resolve do
         schema_changeset = ecto_schema.__changeset__
 
         """
-            Can't
+            Use information provided in changeset
         """
 
         Logger.info("Resolve field (#{field})")

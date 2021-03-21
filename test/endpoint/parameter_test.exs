@@ -3,6 +3,18 @@ defmodule ApiCommons.Endpoint.ParameterTest do
 
     alias ApiCommons.Endpoint.Parameter
 
+    @params_split %{
+        path: {
+
+        },
+        query: {
+
+        },
+        body: {
+
+        }
+    }
+
     @valid %{
         name: "test",
         counter: 2,
@@ -61,5 +73,25 @@ defmodule ApiCommons.Endpoint.ParameterTest do
         test "Missing associations" do
             
         end
+    end
+
+
+    describe "check/3 ::" do
+
+
+        test "max/3" do
+
+
+            # Parameter.check(@params_split, :name, 
+            #     position: :path, 
+            #     default: "Default name", 
+            #     type: :integer, 
+            #     min: 12, max: 20
+            # )
+            # |> Parameter.check(:)
+
+        end
+
+    
     end
 end
