@@ -9,8 +9,8 @@ defmodule ApiCommons.Endpoint.ParameterTest do
         rating: 2.2,
         exists?: false,
         image: <<1>>,
-        start_at: Time.new(8, 0, 0),
-        end_at: Time.new(12, 0, 0)
+        start_at: elem(Time.new(8, 0, 0), 1),
+        end_at: elem(Time.new(12, 0, 0), 1)
     }
 
 
@@ -31,7 +31,7 @@ defmodule ApiCommons.Endpoint.ParameterTest do
             field :start_at, :time
             field :end_at, :time_usec
 
-            belongs_to :comments, TestAssoc
+            belongs_to :test_assoc, TestAssoc
         end
 
     end
@@ -53,6 +53,7 @@ defmodule ApiCommons.Endpoint.ParameterTest do
         test "Invalid parameters, missing keys" do
             values = Map.drop(@valid, [:name])
             parameters = Parameter.like_schema(values, TestSchema)
+            IO.inspect(parameters)
             refute parameters.valid?
         end
 
