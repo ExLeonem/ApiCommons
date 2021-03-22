@@ -5,6 +5,7 @@ defmodule ApiCommons.Endpoint.Parameter do
         Parse parameters passed to endpoint calls into a processable format.
     """
 
+
     require Logger
 
     alias ApiCommons.Endpoint.Utils
@@ -62,27 +63,57 @@ defmodule ApiCommons.Endpoint.Parameter do
             - type (any()) The parameter type used to check. 
             - min (int) Applicable for integer, float and string values (value >= min)
             - max (int) Applicable for integer, float and string values (value <= limit)
-            - 
 
         ## Examples
     """
-    def check(check = %Check{}, parameter_name, opts \\ []) do
+    @default_check_params [
+        type: :string
+    ]
+    def check(check = %Check{data: data}, parameter, opts \\ []) do
 
         position = opts[:position]
-        required? = opts[:required?]
-        type = opts[:type]
-        default = opts[:default]
-
-        min = opts[:min]
-        max = opts[:max]
-
+        value = if data[position], do: Map.get(data[position], parameter)        
         
+        %Check{data: {parameter, value}, opts: opts, errors: MapSet.new()}
+        |> is_required?()
+        |> cast() 
 
     end
-    def check(data, parameter_name, opts) do
-        check(%Check{data: data, schema: nil}, parameter_name, opts)
+    def check(data, parameter, opts) do
+        check(%Check{data: data, schema: nil}, parameter, opts)
     end
 
+
+
+    @doc """
+        Check whether or not the parameter is required for processing.
+
+    """
+    defp is_required?(check = %Check{data: {parameter, value}, opts: opts}) do
+        required? = opts[:required]
+        default_value = opts[:default]
+
+        if required? && (value || default_value) do
+            %{check | parsed: {parameter, value}}
+        else
+            errors = check.errors |> MapSet.put(:required_error) # Refactor
+            %{check | valid?: false, errors: errors}
+        end
+    end
+
+
+    defp cast(check = %Check{data: {parameter, value}, valid?: true, opts: opts}) do
+        type = opts[:type]
+        casted_value = Uitls.cast(value, type)
+
+        case casted_value do
+            :cast_error -> 
+                errors = check.errors |> MapSet.put() # Refactor
+                %{check | errors: errors, valid?: false}
+            _ -> %{check | data: {parameter, casted_value}}
+        end
+    end
+    defp cast(check), do: check
 
     @doc """
         Check for specific options
@@ -121,7 +152,8 @@ defmodule ApiCommons.Endpoint.Parameter do
         ## Examples
     """
     def in_path(params, field, check) do
-        in_path? = Map.get(params, path)
+        # in_path? = Map.get(params, path)
+
     end
 
     def in_path(params, field, check) do
@@ -169,7 +201,10 @@ defmodule ApiCommons.Endpoint.Parameter do
 
 
 
-    def required?(key)
+    def required?(key) do
+
+
+    end
 
     @doc """
 
