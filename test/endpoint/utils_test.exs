@@ -1,7 +1,7 @@
 defmodule ApiCommons.Endpoint.UtilsTest do
     
     use ExUnit.Case
-    alias ApiCommons.Endpoint.Utils
+    alias ApiCommons.Utils
 
     @include_key :hello
 

@@ -1,7 +1,7 @@
 defmodule ApiCommons.Endpoint.ParameterTest do
     use ExUnit.Case
 
-    alias ApiCommons.Endpoint.Parameter
+    alias ApiCommons.Parameter
 
     @params_split %{
         path: {

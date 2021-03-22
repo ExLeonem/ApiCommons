@@ -1,4 +1,4 @@
-defmodule ApiCommons.Endpoint.Parameter.Macro do
+defmodule ApiCommons.Parameter.Macro do
     
       @doc """
             Defines a parameter for an endpoint

@@ -1,4 +1,4 @@
-defmodule ApiCommons.Endpoint.Parameter.Resolve do
+defmodule ApiCommons.Parameter.Resolve do
     
     @moduledoc """
         Resolve parameters passed to the endpoint.

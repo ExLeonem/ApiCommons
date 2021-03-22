@@ -1,4 +1,4 @@
-defmodule ApiCommons.Endpoint.Parameter do
+defmodule ApiCommons.Parameter do
 
     @moduledoc """
         Handle parameters in path & body. Provide checks for availability and values.
@@ -8,8 +8,8 @@ defmodule ApiCommons.Endpoint.Parameter do
 
     require Logger
 
-    alias ApiCommons.Endpoint.Utils
-    alias ApiCommons.Endpoint.Parameter.{Check, Resolve}
+    alias ApiCommons.Utils
+    alias ApiCommons.Parameter.{Check, Resolve}
     alias ApiCommons.Schema.Field
 
     @check_defaults %{position: :path, required?: true, default: nil, type: nil}

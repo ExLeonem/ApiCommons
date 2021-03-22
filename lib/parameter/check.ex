@@ -1,4 +1,4 @@
-    defmodule ApiCommons.Endpoint.Parameter.Check do
+    defmodule ApiCommons.Parameter.Check do
         @moduledoc """
             Similar to Ecto.Changeset. Collects and holds information on valid and invalid parameters passed to the endpoint.
             Collect information on validity of endpoint parameter check ups.
