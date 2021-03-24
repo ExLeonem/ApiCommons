@@ -5,15 +5,20 @@ defmodule ApiCommons.Parameter do
         Parse parameters passed to endpoint calls into a processable format.
     """
 
-
     require Logger
 
+    alias __MODULE__
     alias ApiCommons.Utils
     alias ApiCommons.Parameter.{Check, Resolve}
     alias ApiCommons.Schema.Field
 
-    @check_defaults %{position: :path, required?: true, default: nil, type: nil}
+    @check_defaults %{position: :all, required?: true, default: nil, type: :string}
+    @valid_types  [:string, :integer, :float, :time, :time_usec]
 
+    @doc """
+        Parse single 
+    """
+    defstruct [:name, :opts, :error, type: :string, value: nil, valid?: false]
 
     @doc """
         Merge parameters from Plug.Conn and parameters received at endpoint.
@@ -63,6 +68,7 @@ defmodule ApiCommons.Parameter do
             - type (any()) The parameter type used to check. 
             - min (int) Applicable for integer, float and string values (value >= min)
             - max (int) Applicable for integer, float and string values (value <= limit)
+            - on_of (list) A list of values to check against
 
         ## Examples
     """
@@ -70,69 +76,118 @@ defmodule ApiCommons.Parameter do
         type: :string
     ]
     def check(check = %Check{data: data}, parameter, opts \\ []) do
-
-        position = opts[:position]
-        value = if data[position], do: Map.get(data[position], parameter)        
-        
-        %Check{data: {parameter, value}, opts: opts, errors: MapSet.new()}
+        value = resolve_value(data, parameter, opts)
+        parsed_param = %Parameter{name: parameter, value: value, opts: opts, valid?: true}
         |> is_required?()
-        |> cast() 
+        |> cast()
+        |> in_range()
 
+        # |> resolve_value()
+        
+        case parsed_param.valid? do
+            true -> 
+                # update and return check
+                parsed = check.parsed |> Map.put(parameter,  parsed_param.value)
+                %{check | parsed: parsed}
+            false ->
+                # Parsing the parameter failed
+                errors = check.errors |> Map.put(parameter, parsed_param.error)
+                %{check | valid?: false, errors: errors}
+        end
     end
     def check(data, parameter, opts) do
-        check(%Check{data: data, schema: nil}, parameter, opts)
+        check_opts = %{} |> Map.put(parameter, opts)
+        check(%Check{data: data, schema: nil, opts: check_opts}, parameter, opts)
     end
 
+
+    @doc """
+        Resolve the value of a parameter by it's name.
+
+        ## Parameter
+            - param (Parameter) 
+            - data ()
+            - opts (Keyword) Keyword list of passed options
+        
+        ## Returns
+            - The value if found in the data or nil
+    """
+    defp resolve_value(nil, _, _), do: nil
+    defp resolve_value(data, parameter, [position: position]) do
+        sub_values = data[position]
+        _resolve_value(sub_values, parameter)
+    end
+
+    defp resolve_value(data, [head | tail], opts) do
+        sub_values = data[head]
+        |> resolve_value(tail, opts)
+    end
+    defp resolve_value(data, [], _), do: data
+    defp resolve_value(data, parameter, _), do: data[parameter]
+
+    defp _resolve_value(nil, _), do: nil
+    defp _resolve_value(data, []), do: data
+    defp _resolve_value(data, [head | tail]), do: _resolve_value(data[head], tail)
+    defp _resolve_value(data, parameter), do: data[parameter]
 
 
     @doc """
         Check whether or not the parameter is required for processing.
 
+        ## Parameter
+            - param (Parameter) Parameter struct containing all information about a single parameter check
+
+        ## Returns
+            - (Parameter) The updated parameter definition
+
     """
-    defp is_required?(check = %Check{data: {parameter, value}, opts: opts}) do
+    defp is_required?(param = %Parameter{valid?: false}), do: param
+    defp is_required?(param = %Parameter{name: name, value: value, valid?: true, opts: opts}) do
         required? = opts[:required]
         default_value = opts[:default]
 
         if required? && (value || default_value) do
-            %{check | parsed: {parameter, value}}
+            %{param | value: (value || default_value)}
         else
-            errors = check.errors |> MapSet.put(:required_error) # Refactor
-            %{check | valid?: false, errors: errors}
+            %{param | valid?: false, error: :required_missing}
         end
     end
 
 
-    defp cast(check = %Check{data: {parameter, value}, valid?: true, opts: opts}) do
+    defp cast(param = %Parameter{valid?: false}), do: param
+    defp cast(param = %Parameter{name: name, value: value, valid?: true, opts: opts}) do
         type = opts[:type]
         casted_value = Uitls.cast(value, type)
 
         case casted_value do
-            :cast_error -> 
-                errors = check.errors |> MapSet.put() # Refactor
-                %{check | errors: errors, valid?: false}
-            _ -> %{check | data: {parameter, casted_value}}
+            :cast_error -> %{param | error: :cast_error, valid?: false}
+            _ -> %{param | value: casted_value}
         end
     end
-    defp cast(check), do: check
 
-    @doc """
-        Check for specific options
-    """
-    defp check_option(check, field, option, value)
-    defp check_option(check = %Check{data: data}, field, :required?, true) do
 
+    
+    defp in_range(param = %Parameter{valid?: false}), do: param
+    defp in_range(param = %Parameter{name: name, value: value, type: type, opts: opts}) do
+        min = opts[:min]
+        max = opts[:max]
+
+        in_min_range = !min || (min && min <= _range_metric(value, type))
+        in_max_range = !max || (max && max >= _range_metric(value, type))
+        in_min_range && in_max_range
     end
 
 
-    defp check_option(check, field, _, _) do
-        Check.update(check)
+    defp _range_metric(value, :string), do: String.length(value)
+    defp _range_metric(value, type) when type in [:integer, :float], do: value
+    defp _range_metric(value, _) do
+        # Throw error because, can't check value of given type for range
     end
 
 
     # def check(check, paramter_name, type \\ :required, opts) do
 
     # end
-
 
     @doc """
         Perform checkups of path parameters.

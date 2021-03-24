@@ -4,8 +4,8 @@ defmodule ApiCommons.Parameter.Resolve do
         Resolve parameters passed to the endpoint.
     """
     
-    alias ApiCommons.Endpoint.Parameter.Check
-    alias ApiCommons.Endpoint.Utils
+    alias ApiCommons.Parameter.Check
+    alias ApiCommons.Utils
     require Logger
 
     @doc """

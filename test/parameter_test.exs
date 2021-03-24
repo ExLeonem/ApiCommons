@@ -1,4 +1,4 @@
-defmodule ApiCommons.Endpoint.ParameterTest do
+defmodule ApiCommons.ParameterTest do
     use ExUnit.Case
 
     alias ApiCommons.Parameter
@@ -30,7 +30,7 @@ defmodule ApiCommons.Endpoint.ParameterTest do
     defmodule TestSchema do
         use Ecto.Schema
         
-        alias ApiCommons.Endpoint.ParameterTest.TestAssoc
+        alias ApiCommons.ParameterTest.TestAssoc
         
 
         schema "test_schema" do
@@ -65,7 +65,6 @@ defmodule ApiCommons.Endpoint.ParameterTest do
         test "Invalid parameters, missing keys" do
             values = Map.drop(@valid, [:name])
             parameters = Parameter.like_schema(values, TestSchema)
-            IO.inspect(parameters)
             refute parameters.valid?
         end
 
@@ -78,20 +77,30 @@ defmodule ApiCommons.Endpoint.ParameterTest do
 
     describe "check/3 ::" do
 
+        test "valid single parameter check, all defaults" do
+            params = %{name: "Max Mustermann"}
+            checkd = Parameter.check(params, :name, type: :string, default: "")
 
-        test "max/3" do
+            IO.inspect(checkd)
 
-
-            # Parameter.check(@params_split, :name, 
-            #     position: :path, 
-            #     default: "Default name", 
-            #     type: :integer, 
-            #     min: 12, max: 20
-            # )
-            # |> Parameter.check(:)
-
+            assert checkd.valid?
         end
 
-    
+        test "valid, nested call" do
+            params = %{info: %{name: "John Doe", description: "Lorem ipsum, ..."}}
+            checked = Parameter.check(params, [:info, :name], type: :string)
+
+            assert checked.valid?
+        end
+
+        test "invalid type of parameter" do
+            params = %{name: "hey"}
+            checked = Parameter.check(params, :name, type: :integer) 
+            assert checked.valid?
+        end
+
+        test "" do
+            
+        end
     end
 end

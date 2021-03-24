@@ -1,4 +1,4 @@
-defmodule ApiCommons.Endpoint.Utils do
+defmodule ApiCommons.Utils do
       @moduledoc """
             Utils useable for parameter checks.
         """
