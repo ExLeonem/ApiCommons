@@ -75,32 +75,72 @@ defmodule ApiCommons.ParameterTest do
     end
 
 
-    describe "check/3 ::" do
+    describe "check/3::" do
 
         test "valid single parameter check, all defaults" do
             params = %{name: "Max Mustermann"}
-            checkd = Parameter.check(params, :name, type: :string, default: "")
-
-            IO.inspect(checkd)
-
-            assert checkd.valid?
+            checked = Parameter.check(params, :name, type: :string, default: "")
+            assert checked.valid?
         end
 
         test "valid, nested call" do
             params = %{info: %{name: "John Doe", description: "Lorem ipsum, ..."}}
             checked = Parameter.check(params, [:info, :name], type: :string)
-
+            IO.inspect(checked)
             assert checked.valid?
         end
 
         test "invalid type of parameter" do
             params = %{name: "hey"}
-            checked = Parameter.check(params, :name, type: :integer) 
+            checked = Parameter.check(params, :name, type: :integer, min: 5)
+            assert !checked.valid? && checked.errors[:name] == :cast_error
+        end
+
+        test "invalid nested call" do
+            params = %{info: %{name: "John Doe", description: "Lorem ipsum, ..."}}
+            checked = Parameter.check(params, [:info, :more], type: :integer)
+            IO.inspect(checked)
+            assert checked.valid?
+        end
+    end
+
+
+    describe "check/3 range" do
+
+        test "valid min range" do
+            params = %{name: "John", age: 12}
+            checked = Parameter.check(params, :name, type: :string, min: 4)
             assert checked.valid?
         end
 
-        test "" do
-            
+        test "invalid min range" do
+            params = %{name: "John", age: 12}
+            checked = Parameter.check(params, :name, type: :name, min: 5)
+            assert !checked.valid? && checked.errors[:name] == :range_error
+        end
+
+        test "valid max range" do
+            params = %{name: "John Doe", age: 12}
+            checked = Parameter.check(params, :name, type: :string, max: 12)
+            assert checked.valid?
+        end
+
+        test "invalid max range" do
+            params = %{name: "John Doe", age: 12}
+            checked = Parameter.check(params, :name, type: :string, max: 5)
+            assert !checked.valid? && checked.errors[:name] == :range_error
+        end
+
+        test "valid range" do
+            params = %{name: "John Doe", age: 12}
+            checked = Parameter.check(params, :name, type: :string, min: 4, max: 8)
+            assert checked.valid?
+        end
+
+        test "invalid range" do
+            params = %{name: "John Doe", age: 12}
+            checked = Parameter.check(params, :name, type: :string, min: 4, max: 5)
+            assert !checked.valid? && checked.errors[:name] == :range_error
         end
     end
 end

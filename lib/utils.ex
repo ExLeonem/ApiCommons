@@ -4,8 +4,8 @@ defmodule ApiCommons.Utils do
         """
 
         require Logger
+        @ecto_types [:id, :binary_id, :integer, :float, :boolean, :string, :binary, :map, :decimal]
 
-        @ecto_types [:id, :binary_id, :integer, :float, :boolean, :string, :binary, :map, :decimal, ]
 
         @doc """
             Check if the passed value is of the schema type.
@@ -36,8 +36,7 @@ defmodule ApiCommons.Utils do
             ## Examples
 
         """ 
-
-         def cast(value, _) when value in [[], {}, %{}, nil] do
+        def cast(value, _) when value in [[], {}, %{}, nil] do
             # Empty value
             :empty
         end
@@ -97,7 +96,6 @@ defmodule ApiCommons.Utils do
             value
         end
 
-
         def cast(value = %Time{}, type) when type in [:time, :time_usec] , do: value
         def cast(value, type) when is_bitstring(value) and type in [:time, :time_usec]  do
             case Time.from_iso8601(value) do
@@ -106,9 +104,13 @@ defmodule ApiCommons.Utils do
             end
         end
         def cast(value, type) when type in [:time, :time_usec], do: :wrong_type
+        
+        def cast(value, type) do
+            # No value matched, throw an error
+            value
+        end
 
 
-        # Check wether field should be excluded
         @doc """
             Check wether field should be excluded for further processing.
 
@@ -129,4 +131,14 @@ defmodule ApiCommons.Utils do
         def includes?(atom_list, field_name) do
             Enum.any?(atom_list, fn x -> field_name == x end)
         end
+
+        
+        @doc """
+            Generate nested map for a access path
+        """
+        # def resolve_name()
+        # def resolve_name([], map), do: map
+        # def resolve_name([head| tail], map) do
+
+        # end
 end

@@ -12,6 +12,10 @@
 
         """
 
+        alias ApiCommons.Parameter
+        alias ApiCommons.Parameter.Path
+
+
         @doc """
             Save checks on parameters
         """
@@ -27,6 +31,27 @@
             data: map(),
             errors: map()
         }
+
+
+        @doc """
+            Update check with single parameter checks.
+
+            ## Parameter
+                - check (Check)
+                - param (Parameter)
+
+            ## Returns
+                - (Check)
+        """
+        def update(param = %Parameter{name: name, value: value, valid?: true}, check) do
+            parsed = check.parsed |> Map.put(name, value)
+            %{check | parsed: parsed}
+        end
+
+        def update(param = %Parameter{name: name, valid?: false, error: error}, check) do
+            errors = check.errors |> Map.put(name, error)
+            %{check | valid?: false, errors: errors}
+        end
 
 
         @doc """

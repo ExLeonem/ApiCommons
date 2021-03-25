@@ -81,25 +81,12 @@ defmodule ApiCommons.Parameter do
         |> is_required?()
         |> cast()
         |> in_range()
-
-        # |> resolve_value()
-        
-        case parsed_param.valid? do
-            true -> 
-                # update and return check
-                parsed = check.parsed |> Map.put(parameter,  parsed_param.value)
-                %{check | parsed: parsed}
-            false ->
-                # Parsing the parameter failed
-                errors = check.errors |> Map.put(parameter, parsed_param.error)
-                %{check | valid?: false, errors: errors}
-        end
+        |> Check.update(check)
     end
     def check(data, parameter, opts) do
         check_opts = %{} |> Map.put(parameter, opts)
         check(%Check{data: data, schema: nil, opts: check_opts}, parameter, opts)
     end
-
 
     @doc """
         Resolve the value of a parameter by it's name.
@@ -132,6 +119,19 @@ defmodule ApiCommons.Parameter do
 
 
     @doc """
+
+    """
+    # defp resolve_param_name(map, [])
+    # defp resolve_param_name(map, [head | tail]) do
+
+    # end
+    
+    # defp resolve_parameter_name(map, parameter) do
+
+    # end
+
+
+    @doc """
         Check whether or not the parameter is required for processing.
 
         ## Parameter
@@ -146,7 +146,7 @@ defmodule ApiCommons.Parameter do
         required? = opts[:required]
         default_value = opts[:default]
 
-        if required? && (value || default_value) do
+        if (required? && (value || default_value)) || !required? do
             %{param | value: (value || default_value)}
         else
             %{param | valid?: false, error: :required_missing}
@@ -154,10 +154,19 @@ defmodule ApiCommons.Parameter do
     end
 
 
+    @doc """
+        Cast a parameter to specific type.
+
+        ## Parameter
+            - param (Parameter) 
+
+        ## Returns
+            - 
+    """
     defp cast(param = %Parameter{valid?: false}), do: param
     defp cast(param = %Parameter{name: name, value: value, valid?: true, opts: opts}) do
         type = opts[:type]
-        casted_value = Uitls.cast(value, type)
+        casted_value = Utils.cast(value, type)
 
         case casted_value do
             :cast_error -> %{param | error: :cast_error, valid?: false}
@@ -174,20 +183,36 @@ defmodule ApiCommons.Parameter do
 
         in_min_range = !min || (min && min <= _range_metric(value, type))
         in_max_range = !max || (max && max >= _range_metric(value, type))
-        in_min_range && in_max_range
+        case in_min_range && in_max_range do
+            true -> param
+            false ->
+                %{param | valid?: false, error: :range_error}
+        end
     end
 
 
+    @doc """
+        Turn value into a range comparable value. 
+
+        ## Parameter
+
+        ## Returns
+            - (int) Integer value to make range comparisons.
+
+        ## Examples
+
+        iex> _range_metric("hey", :string)
+        iex> 3
+
+        iex> range_metric("helloworld", :string)
+        iex> 8
+    """
     defp _range_metric(value, :string), do: String.length(value)
     defp _range_metric(value, type) when type in [:integer, :float], do: value
     defp _range_metric(value, _) do
         # Throw error because, can't check value of given type for range
     end
 
-
-    # def check(check, paramter_name, type \\ :required, opts) do
-
-    # end
 
     @doc """
         Perform checkups of path parameters.
@@ -254,12 +279,6 @@ defmodule ApiCommons.Parameter do
         |> Resolve.assocs()
     end
 
-
-
-    def required?(key) do
-
-
-    end
 
     @doc """
 

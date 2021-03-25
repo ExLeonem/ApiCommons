@@ -55,7 +55,7 @@ defmodule ApiCommons.Parameter.Resolve do
             Use information provided in changeset
         """
 
-        Logger.info("Resolve field (#{field})")
+        # Logger.info("Resolve field (#{field})")
         checks = cond do
             is_nil(data) -> %{checks | valid?: false, errors: :empty_data}
             Utils.includes?(to_exclude, field) || !Map.has_key?(schema_changeset, field) -> 
@@ -71,7 +71,7 @@ defmodule ApiCommons.Parameter.Resolve do
                 Check.update(field, value, checks, optional?: optional?)
         end
 
-        Logger.info("Finish resolve field (#{field})")
+        # Logger.info("Finish resolve field (#{field})")
         fields(next_fields, checks) 
     end
 
@@ -105,9 +105,9 @@ defmodule ApiCommons.Parameter.Resolve do
                 assoc_data = Map.get(data, to_string(field))
                 related_schema_fields = related_schema.__schema__(:fields)
 
-                Logger.info("Resolve assoc (#{field})")
+                # Logger.info("Resolve assoc (#{field})")
                 new_checks = fields(related_schema_fields, %Check{data: assoc_data, schema: related_schema, opts: opts})
-                Logger.info("Assoc fields resolved")
+                # Logger.info("Assoc fields resolved")
 
                 # Check wether schema valid
                 optional? = Utils.includes?(is_optional, assoc)
