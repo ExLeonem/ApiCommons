@@ -1,4 +1,4 @@
-defprotocol ApiCommons.Hateoas do
+defprotocol ApiCommons.Schema.Hateoas do
 
     @moduledoc """
         Generating Hateoas links

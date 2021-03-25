@@ -5,8 +5,14 @@
 
 <!-- Common operations for fast REST API development and documentation. -->
 
-Development of REST API is tedious, even though there are reccurant things that need to be done.
-This library is an attempt to increase the speed in which REST APIs can be developed.
+Development of a REST API is tedious. Use your ecto schemes to generate endpoints quicker.
+
+
+[Mongoose-rest-api](https://www.npmjs.com/package/mongoose-rest-api)
+
+<!-- Transform your ecto schemes into  -->
+<!-- even though there are reccurant things that need to be done.
+This library is an attempt to increase the speed in which REST APIs can be developed. -->
 
 
 ## Index 
@@ -28,6 +34,7 @@ This library is an attempt to increase the speed in which REST APIs can be devel
 - [ ] Auto-Generate OpenAPI file from DSL usage
 - [ ] Auto-Generate HTML API Documentation
 - [ ] Plug to sync OpenAPI definition and DSL definitions?
+- [ ] Adding option for configuration to map errors
 
 
 
@@ -59,6 +66,74 @@ be found at [https://hexdocs.pm/api_commons](https://hexdocs.pm/api_commons).
 
 
 ## Examples
+
+
+| Function | Description
+| --- | ---
+| &check/3 | Check received parameter list for a single parameter
+| &like_schema/3 | Check received parameters against ecto schema
+
+
+
+```elixir
+
+defmodule AppWeb.CommentController do
+  use AppWeb, :controller
+  alias ApiCommons.Parameter
+
+  def create(conn, params) do
+    param_checks = conn
+    |> Parameter.check(:user, type: :integer, position: :body)
+    |> Parameter.check(:title, position: :body)
+    |> Parameter.check(:content, position: :body)
+    |> Parameter.check(:response_on, type: :integer, required?: false)
+
+    # Render either error view or the entity
+    if param_checks.valid? do
+      render("comment.json", params: param_checks.parsed)
+    else
+      render("error.json", errors: param_checks.errors)
+    end
+  end
+end
+
+defmodule AppWeb.CommentView do
+  use AppWeb, :view
+  alias ApiCommons.Response
+
+  def render("error.json", params) do
+    # Render the error
+  end
+
+  def render("comment.json", params) do
+    
+  end
+end
+
+```
+
+
+```elixir
+
+defmodule AppWeb.CommentController do
+  use AppWeb, :controller
+
+  alias AppRepo.Comment
+  alias ApiCommons.Parameter
+
+  def create(conn, params) do
+    param_checks = params
+    |> Parameter.like_json(Comment)
+
+    # Render either error view or the entity
+    if param_checks.valid? do
+      render("comment.json", params: param_checks.parsed)
+    else
+      render("error.json", errors: param_checks.errors)
+    end
+  end
+end
+```
 
 
 ## Contribution

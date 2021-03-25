@@ -37,8 +37,9 @@ defmodule ApiCommons do
 
   def render(:show, schema, values, params) do
 
-    # Need to check wether values are valid changeset or not
+    # TODO: use Map.from_struct()
 
+    # Need to check wether values are valid changeset or not
     field_names = schema.__schema__(:fields)
     base_resource = %{}
 
@@ -66,7 +67,7 @@ defmodule ApiCommons do
   """
   def link(schema, other_schema, name \\ nil) do
     # Item |> link(Store)
-
+    
   end
 
   @doc """

@@ -1,6 +1,10 @@
 defmodule ApiCommons.Schema.FieldTest do
     use ExUnit.Case
     # doctest ApiCommons.Schema.Field
+<<<<<<< HEAD
+=======
+
+>>>>>>> e1dcd5c6a45ddeb086d8ad8a391a045200a9fd96
     alias ApiCommons.Schema.Field
 
     @field_map %{
@@ -22,7 +26,10 @@ defmodule ApiCommons.Schema.FieldTest do
             assert Field.rename(field_name, @field_map) == @field_map[field_name]
         end
 
+<<<<<<< HEAD
         # Failing, Exclude to test travis ci setup
+=======
+>>>>>>> e1dcd5c6a45ddeb086d8ad8a391a045200a9fd96
         # test "Invalid, No atom for field name given" do
         #     field_name = "something_else"
         #     assert Field.rename(field_name, @field_map)
@@ -50,11 +57,18 @@ defmodule ApiCommons.Schema.FieldTest do
             assert Field.exclude?(:first, skip_values)
         end
 
+<<<<<<< HEAD
         # Failing, excluded to check travis config
         # test "Invalid, invalid skip values passed" do
         #     invalid_value = "other_value"
         #     assert Field.exclude?(:first, invalid_value)
         # end
+=======
+        test "Invalid, invalid skip values passed" do
+            invalid_value = "other_value"
+            refute Field.exclude?(:first, invalid_value)
+        end
+>>>>>>> e1dcd5c6a45ddeb086d8ad8a391a045200a9fd96
 
 
     end
