@@ -1,28 +1,6 @@
 defmodule ApiCommons.Parameter.Path do
 
-    # @doc """
-    #     Create a map 
-        
-    #     ## Parameter
-    #         - path (list[atom]) A list of map keys representing a path
-
-    #     ## Returns
-    #         -
-    # """
-    # def resolve(path), do: resolve(%{}, parts)
-
-
-    # @doc """
-    #     Create a given pat
-    # """
-    # def resolve(map, path)
-    # def resolve(map, []), do: map
-    # def resolve(map, [head | []]), do: Map.put(map, nil)
-    # def resolve(map, [head | tail]) do
-    #     Map.put(map, head, %{})
-    #     |> resolve()
-    # end
-
+    
     
     @doc """
         

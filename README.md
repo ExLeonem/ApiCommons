@@ -113,5 +113,28 @@ end
 ```
 
 
+```elixir
+
+defmodule AppWeb.CommentController do
+  use AppWeb, :controller
+
+  alias AppRepo.Comment
+  alias ApiCommons.Parameter
+
+  def create(conn, params) do
+    param_checks = params
+    |> Parameter.like_json(Comment)
+
+    # Render either error view or the entity
+    if param_checks.valid? do
+      render("comment.json", params: param_checks.parsed)
+    else
+      render("error.json", errors: param_checks.errors)
+    end
+  end
+end
+```
+
+
 ## Contribution
 

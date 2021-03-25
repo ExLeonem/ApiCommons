@@ -107,16 +107,4 @@
         """
         defp empty?(value) when value in [[], %{}, nil], do: true
         defp empty?(_value), do: false
-
-
-
-
-
-
-        def max(value, limit), do: nil
-        def max(value, nil), do: true
-
-
-        def min(value, limit), do: nil
-        def min(value, nil), do: true
     end
