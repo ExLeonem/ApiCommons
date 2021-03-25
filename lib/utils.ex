@@ -38,7 +38,7 @@ defmodule ApiCommons.Utils do
         """ 
         def cast(value, _) when value in [[], {}, %{}, nil] do
             # Empty value
-            :empty
+            nil
         end
 
         def cast(value, type) when type in [:id, :integer] and is_integer(value), do: value

@@ -57,7 +57,6 @@ defmodule ApiCommons.Parameter.Path do
         else
             %{}
         end
-
         Map.put(map, head, resolve(default_map, tail, value))
     end
 

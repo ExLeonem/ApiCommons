@@ -43,14 +43,16 @@
             ## Returns
                 - (Check)
         """
-        def update(param = %Parameter{name: name, value: value, valid?: true}, check) do
-            parsed = check.parsed |> Map.put(name, value)
-            %{check | parsed: parsed}
+        def update(param = %Parameter{name: name, value: value, valid?: true, opts: opts}, check) do
+            parsed = Path.resolve(check.parsed, name, value)
+            new_opts = Path.resolve(check.opts, name, opts)
+            %{check | parsed: parsed, opts: new_opts}
         end
 
-        def update(param = %Parameter{name: name, valid?: false, error: error}, check) do
-            errors = check.errors |> Map.put(name, error)
-            %{check | valid?: false, errors: errors}
+        def update(param = %Parameter{name: name, valid?: false, error: error, opts: opts}, check) do
+            errors = Path.resolve(check.errors, name, error)
+            new_opts = Path.resolve(check.opts, name, opts)
+            %{check | valid?: false, errors: errors, opts: new_opts}
         end
 
 

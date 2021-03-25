@@ -9,7 +9,7 @@ defmodule ApiCommons.Parameter do
 
     alias __MODULE__
     alias ApiCommons.Utils
-    alias ApiCommons.Parameter.{Check, Resolve}
+    alias ApiCommons.Parameter.{Check, Resolve, Path}
     alias ApiCommons.Schema.Field
 
     @check_defaults %{position: :all, required?: true, default: nil, type: :string}
@@ -59,14 +59,14 @@ defmodule ApiCommons.Parameter do
             - opts (Keyword) Additional parameters provided to direct 
 
 
-        ### Options:
+        ### Options
             - position (atom) One value of [:path, :query, :body], indicates the position of the parameter. Defaults to (:path)
             - required? (boolean) Wether or not the parameter to check is required. Defaults to (:false)
             - default (any()) The default value for given parameter, will only be applied if no value is provided for an optional parameter.
 
             - check (function) A function that performs checks for the parameter
             - type (any()) The parameter type used to check. 
-            - min (int) Applicable for integer, float and string values (value >= min)
+            - min (int) Applicable for integer, float and string values (value >= limit)
             - max (int) Applicable for integer, float and string values (value <= limit)
             - on_of (list) A list of values to check against
 
@@ -84,7 +84,7 @@ defmodule ApiCommons.Parameter do
         |> Check.update(check)
     end
     def check(data, parameter, opts) do
-        check_opts = %{} |> Map.put(parameter, opts)
+        check_opts = Path.resolve(parameter, opts)
         check(%Check{data: data, schema: nil, opts: check_opts}, parameter, opts)
     end
 
@@ -143,9 +143,9 @@ defmodule ApiCommons.Parameter do
     """
     defp is_required?(param = %Parameter{valid?: false}), do: param
     defp is_required?(param = %Parameter{name: name, value: value, valid?: true, opts: opts}) do
-        required? = opts[:required]
+        required? = opts[:required?]
         default_value = opts[:default]
-
+        
         if (required? && (value || default_value)) || !required? do
             %{param | value: (value || default_value)}
         else
@@ -170,6 +170,7 @@ defmodule ApiCommons.Parameter do
 
         case casted_value do
             :cast_error -> %{param | error: :cast_error, valid?: false}
+            :invalid_format -> %{param | error: :invalid_format, valid?: false}
             _ -> %{param | value: casted_value}
         end
     end

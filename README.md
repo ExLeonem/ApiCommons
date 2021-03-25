@@ -68,5 +68,50 @@ be found at [https://hexdocs.pm/api_commons](https://hexdocs.pm/api_commons).
 ## Examples
 
 
+| Function | Description
+| --- | ---
+| &check/3 | Check received parameter list for a single parameter
+| &like_schema/3 | Check received parameters against ecto schema
+
+
+
+```elixir
+
+defmodule AppWeb.CommentController do
+  use AppWeb, :controller
+  alias ApiCommons.Parameter
+
+  def create(conn, params) do
+    param_checks = conn
+    |> Parameter.check(:user, type: :integer, position: :body)
+    |> Parameter.check(:title, position: :body)
+    |> Parameter.check(:content, position: :body)
+    |> Parameter.check(:response_on, type: :integer, required?: false)
+
+    # Render either error view or the entity
+    if param_checks.valid? do
+      render("comment.json", params: param_checks.parsed)
+    else
+      render("error.json", errors: param_checks.errors)
+    end
+  end
+end
+
+defmodule AppWeb.CommentView do
+  use AppWeb, :view
+  alias ApiCommons.Response
+
+  def render("error.json", params) do
+    # Render the error
+  end
+
+  def render("comment.json", params) do
+    
+  end
+end
+
+```
+
+
 ## Contribution
 
