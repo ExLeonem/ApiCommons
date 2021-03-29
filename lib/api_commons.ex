@@ -1,9 +1,65 @@
 defmodule ApiCommons do
   alias ApiCommons.Schema.Field
+  alias ApiCommons.Request
 
   @moduledoc """
     Functions and Macros for quick REST API endpoint generation.
+
+    A full guide to REST API's can be found [here](https://restfulapi.net/)
+
+    ## [HTTP Codes](https://restfulapi.net/http-status-codes/)
+      - 1xx *Informational* - Communicates transfer protocol-level information
+      - 2xx *Success* - Indicates that the clients request was accepted successfully
+      - 3xx *Redirection* - Indicates that the client must take some additional action in order to complete request.
+      - 4xx *Client Error* - Category of error status codes point finger at client.
+      - 5xx *Server Error* - Server takes responsibility for these error status codes.
+
+
+    ### 2xx
+
+      - 200 (OK) - REST API request successfully carried out.
+      - 201 (Created) - Resource was created inside a collection.
+      - 202 (Accepted) - For long processes. Request accepted for processing
+      - 204 (No Content) - Rest API declines to send back any status message or representation.
+
+    ### 3xx
+      
+      - 301 (Moved) - REST API model has significantly been redesigned
+      - 302 (Found) -
+      - 303 (See Other) - 
+      - 304 (Not Modified) - 
+      - 307 (Temporary Redirect) - 
+
+
+    ### 4xx
+
+      - 400 (Bad Request) - Generic client-side error
+      - 401 (Unauthorized) - Client tried to operate on a protected resource
+      - 403 (Forbidden) - Client request formed correctly, REST Api won't honor it.
+      - 404 (Not Found) - Can't map URI to a resource
+      - 405 (Method Not Allowed) API responds with a 405 error to indicate 
+    
+
   """
+
+
+  @doc """
+
+    # 
+  """
+  def request(conn) do
+
+    %Request{}
+
+  end
+
+
+  def response(data, opts \\ [])
+  def response(data, opts) do
+
+      
+  end
+
 
   @doc """
       Use an ecto schema as a base for generation of a

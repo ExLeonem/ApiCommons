@@ -5,7 +5,8 @@
 
 <!-- Common operations for fast REST API development and documentation. -->
 
-Development of a REST API is tedious. Use your ecto schemes to generate endpoints quicker.
+
+Use ecto schemas to parse and check received parameters.
 
 
 [Mongoose-rest-api](https://www.npmjs.com/package/mongoose-rest-api)
@@ -20,6 +21,7 @@ This library is an attempt to increase the speed in which REST APIs can be devel
 2. [Installation](#Installation)
 3. [Dependencies](#Dependencies)
 4. [Examples](#Examples)
+  1. [Parameter check](#Parameter-check)
 5. [Contribution](#Contribution)
 
 
@@ -35,6 +37,8 @@ This library is an attempt to increase the speed in which REST APIs can be devel
 - [ ] Auto-Generate HTML API Documentation
 - [ ] Plug to sync OpenAPI definition and DSL definitions?
 - [ ] Adding option for configuration to map errors
+
+- [ ] Plug to map errors specific errors to json responses (405, ...)
 
 
 
@@ -65,7 +69,7 @@ be found at [https://hexdocs.pm/api_commons](https://hexdocs.pm/api_commons).
 ## Dependencies
 
 
-## Examples
+## Parameter check
 
 
 | Function | Description

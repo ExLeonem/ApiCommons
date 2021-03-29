@@ -21,5 +21,4 @@ defmodule ApiCommons.Response.Template do
     def default_json_errors(error_codes) do
         
     end
-
 end

@@ -1,7 +1,6 @@
 defmodule ApiCommons.Schema.FieldTest do
     use ExUnit.Case
     # doctest ApiCommons.Schema.Field
-
     alias ApiCommons.Schema.Field
 
     @field_map %{
@@ -38,7 +37,6 @@ defmodule ApiCommons.Schema.FieldTest do
     end
 
 
-
     describe "Skip check:" do
 
         test "Valid, auto-transform list and skip field" do
@@ -54,8 +52,6 @@ defmodule ApiCommons.Schema.FieldTest do
             invalid_value = "other_value"
             refute Field.exclude?(:first, invalid_value)
         end
-
-
     end
 
 end

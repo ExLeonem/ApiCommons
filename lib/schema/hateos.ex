@@ -5,6 +5,7 @@ defprotocol ApiCommons.Schema.Hateoas do
 
         To generate hateoas links we need API Routes.
 
+        Routes can be aquired from router by Router.__routes__()
 
         # HATEOAS standards
         - [JSON HAL](https://tools.ietf.org/html/draft-kelly-json-hal-08)
@@ -18,5 +19,14 @@ defprotocol ApiCommons.Schema.Hateoas do
     # @spec link(t) :: String.t
     # def link(some_value)
 
+
+    def hal() do
+
+    end
+
+
+    def siren() do
+
+    end
 
 end

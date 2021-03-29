@@ -5,6 +5,12 @@ defmodule ApiCommons.ResponseTest do
 
 
 
-    
+    describe "Test success" do
+
+        test "valid " do
+            
+        end
+
+    end
 
 end

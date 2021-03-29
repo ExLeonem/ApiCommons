@@ -1,77 +1,77 @@
 defmodule ApiCommons.Response do
     
+    alias ApiCommons.Request
+
     @moduledoc """
-        Generate Endpoint responses
+
     """
 
-    def to_json(data, status, opts) do
+
+    @doc """
+
+    """
+    defmacro __using__(opts) do
         
+        quote do
+            
+            def single(data, opts \\ []) do
+                __MODULE__.render_one(data, __MODULE__, "single.json")
+            end
+
+            def multi(data, opts \\ []) do
+                __MODULE__.render_many(data, __MODULE__, "mutli.json")
+            end
+        end        
+    end
+
+
+
+
+    @doc """
+        Return single resource 
+
+
+    """
+    def single(schema, opts \\ []) do
+
     end
 
 
     @doc """
-        Load a response template to be filled.
+        Resond with multiple entities.
 
-        ## Parameter
-            - path (string) The path to the eex template
-
-        ## Returns
-            - 
     """
-    def load_template() do
+    def multi(data, opts) do
 
     end
 
     
-    def errors(errors, msg) do
-
-    end
-
-
     @doc """
+        Respond with error.
 
-    
         ## Parameter
-            - schema (Ecto.Schema)
-            - params (map)
-            - opts (map)
+            - errors () List of errors received 
+            - opts (Keyword) Additional options
 
         ## Returns
             - 
     """
-    def to_json(schema, params, opts) do
+    def error(errors, opts \\ []) do
+
+        %{
+            status: 
+        }
+    end
+
+
+
+    def schema(request = %Request{}) do
         
     end
 
 
-    @doc """
-
-        ## Parameter
-            - schema (Ecto.Schema)
-            - search_keys (Keyword)
-            - opts (Map)
-
-        ### Options
-            - status (int) The status code to return
-
-        ## Returns
-            - search_keys (list)
-            - primary_key (list)
-    """
-    defp outter_template(data, status_code) do
-        %{
-            status: 200 || status_code,
-            data: data
-        }
+    def template(request = %Request{}) do
+        
     end
 
-
-    @doc """
-
-    """
-    defp default_error(opts) do
-        %{
-
-        }
-    end
 end

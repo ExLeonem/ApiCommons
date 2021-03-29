@@ -8,12 +8,18 @@ defmodule ApiCommons.Parameter do
     require Logger
 
     alias __MODULE__
+    alias ApiCommons.Request
     alias ApiCommons.Utils
     alias ApiCommons.Parameter.{Check, Resolve, Path}
     alias ApiCommons.Schema.Field
+    
 
     @check_defaults %{position: :all, required?: true, default: nil, type: :string}
     @valid_types  [:string, :integer, :float, :time, :time_usec]
+
+    @default_check_params [
+        type: :string
+    ]
 
     @doc """
         Parse single 
@@ -50,6 +56,47 @@ defmodule ApiCommons.Parameter do
 
 
     @doc """
+        Fetch pagination information. To limit the output.
+
+        [Pagination options](https://www.moesif.com/blog/technical/api-design/REST-API-Design-Filtering-Sorting-and-Pagination/)
+
+        ## Parameter
+            - data (map) Received parameter to be processed.
+
+        ## Pagination options
+            - offset (integer) The entity where to begin
+            - limit (integer) The amount of items to return
+
+        ## Returns
+            - Pagination information that can be used in ecto query.
+    """
+    def paginate(data) do
+
+        [offset: data["offset"], limit: data["limit"]]
+    end
+
+
+    @doc """
+
+    """
+    def filter(data) do
+
+    end
+
+
+    @doc """
+
+    """
+    def sort(data) do
+
+    end
+
+
+    def check(request, parameter, opts \\ []) do
+        
+    end
+
+    @doc """
         Check wether or not the given parameter is provided as
         in the plug connection. 
 
@@ -72,9 +119,6 @@ defmodule ApiCommons.Parameter do
 
         ## Examples
     """
-    @default_check_params [
-        type: :string
-    ]
     def check(check = %Check{data: data}, parameter, opts \\ []) do
         value = resolve_value(data, parameter, opts)
         parsed_param = %Parameter{name: parameter, value: value, opts: opts, valid?: true}
@@ -116,19 +160,6 @@ defmodule ApiCommons.Parameter do
     defp _resolve_value(data, []), do: data
     defp _resolve_value(data, [head | tail]), do: _resolve_value(data[head], tail)
     defp _resolve_value(data, parameter), do: data[parameter]
-
-
-    @doc """
-
-    """
-    # defp resolve_param_name(map, [])
-    # defp resolve_param_name(map, [head | tail]) do
-
-    # end
-    
-    # defp resolve_parameter_name(map, parameter) do
-
-    # end
 
 
     @doc """
@@ -281,15 +312,12 @@ defmodule ApiCommons.Parameter do
     end
 
 
+
     @doc """
+        Transform parameter validation to a query.
 
     """
-    def max(key, value, limit) when is_integer(value) and value <= limit, do: {key, value}
-    def max(key, value, limit) when is_integer(value), do: {key, value, {:max_bound_err, limit}}
-    def max(key, value, limit) when is_bitstring(value) do
-        cond do
-            String.length(value) <= limit -> {key, value}
-            true -> {key, value, {:max_bound_err, limit}}
-        end
+    def to_query(tables, parameters, map) do
+        
     end
 end
