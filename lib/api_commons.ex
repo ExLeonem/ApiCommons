@@ -44,6 +44,29 @@ defmodule ApiCommons do
 
 
   @doc """
+    Build a resource out of accumulated data.
+
+    ## Parameter
+      - 
+
+  """
+  def build(build_function, request, acc_key) do
+
+  end
+
+
+  @doc """
+    Query entities returns the result
+    
+  """
+  def query() do
+
+  end
+
+
+  
+
+  @doc """
 
     # 
   """

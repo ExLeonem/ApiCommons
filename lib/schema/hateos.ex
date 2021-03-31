@@ -20,13 +20,13 @@ defprotocol ApiCommons.Schema.Hateoas do
     # def link(some_value)
 
 
-    def hal() do
+    # def hal() do
 
-    end
+    # end
 
 
-    def siren() do
+    # def siren() do
 
-    end
+    # end
 
 end

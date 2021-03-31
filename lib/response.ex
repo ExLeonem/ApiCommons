@@ -8,26 +8,6 @@ defmodule ApiCommons.Response do
 
 
     @doc """
-
-    """
-    defmacro __using__(opts) do
-        
-        quote do
-            
-            def single(data, opts \\ []) do
-                __MODULE__.render_one(data, __MODULE__, "single.json")
-            end
-
-            def multi(data, opts \\ []) do
-                __MODULE__.render_many(data, __MODULE__, "mutli.json")
-            end
-        end        
-    end
-
-
-
-
-    @doc """
         Return single resource 
 
 
@@ -58,20 +38,13 @@ defmodule ApiCommons.Response do
     """
     def error(errors, opts \\ []) do
 
-        %{
-            status: 
-        }
+        # %{
+        #     status: 
+        # }
     end
 
-
-
+    
     def schema(request = %Request{}) do
         
     end
-
-
-    def template(request = %Request{}) do
-        
-    end
-
 end

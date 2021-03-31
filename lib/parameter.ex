@@ -26,34 +26,6 @@ defmodule ApiCommons.Parameter do
     """
     defstruct [:name, :opts, :error, type: :string, value: nil, valid?: false]
 
-    @doc """
-        Merge parameters from Plug.Conn and parameters received at endpoint.
-        Puts the merged parameter into a map.
-
-        ## Parameter
-            - conn (Plug.Conn) 
-            - params (Map)
-
-        ## Returns
-            - Map containing all parameters %{path: [], query: [], body: []}
-
-        ## Examples
-    """
-    def fetch(conn) do
-        # BODY PARAMETERS can be found in conn.body_params
-        # QUERY PARAMETERS can be foun din conn.query_params
-
-        body_params = conn.body_params
-        query_params = conn.query_params
-        path_params = conn.path_params
-        
-        %{
-            path: path_params,
-            body: body_params,
-            query: query_params
-        }
-    end
-
 
     @doc """
         Fetch pagination information. To limit the output.
@@ -62,39 +34,54 @@ defmodule ApiCommons.Parameter do
 
         ## Parameter
             - data (map) Received parameter to be processed.
+            - defaults (Keyword) Default parameters when no pagination information was found [limit: 10, offset: 0]
 
         ## Pagination options
             - offset (integer) The entity where to begin
             - limit (integer) The amount of items to return
 
         ## Returns
-            - Pagination information that can be used in ecto query.
+            - Request struct for further processing
     """
-    def paginate(data) do
+    def pagination(conn, defaults \\ [limit: 10, offset: 0])
+    def pagination(conn, defaults) do
+        Request.new(conn)
+        |> pagination()
+    end
 
-        [offset: data["offset"], limit: data["limit"]]
+    def pagination(request = %Request{}, defaults) do
+
+        temp_limit = defaults[:limit]
+        limit = if (!is_nil(temp_limit) && tem_limit > 0), do: temp_limit, else: 0
+
+        temp_offset = defaults[:offset]
+        offset = if limit > 0 && !is_nil(temp_offset) && temp_offset > 0, do: temp_offset, else: 0
+
+        request
+        |> check(:limit, position: :query, type: :integer, acc: :paginate, default: limit)
+        |> check(:offset, position: :query, type: :integer, acc: :paginate, defaul: offset)
     end
 
 
     @doc """
-
-    """
-    def filter(data) do
-
-    end
-
-
-    @doc """
-
-    """
-    def sort(data) do
-
-    end
-
-
-    def check(request, parameter, opts \\ []) do
         
+    """
+    def filter(request) do
+
     end
+
+
+    @doc """
+
+    """
+    def sort(request) do
+
+    end
+
+
+    # def check(request, parameter, opts \\ []) do
+        
+    # end
 
     @doc """
         Check wether or not the given parameter is provided as
@@ -107,6 +94,9 @@ defmodule ApiCommons.Parameter do
 
 
         ### Options
+            - in (atom) Position of the parameter value [:path, :query, :body] (use instead of position:)
+            - acc (atom) Accumulate data under this atom, can be later accessed by this key with Request.get(request, acc_key).
+
             - position (atom) One value of [:path, :query, :body], indicates the position of the parameter. Defaults to (:path)
             - required? (boolean) Wether or not the parameter to check is required. Defaults to (:false)
             - default (any()) The default value for given parameter, will only be applied if no value is provided for an optional parameter.
@@ -119,6 +109,9 @@ defmodule ApiCommons.Parameter do
 
         ## Examples
     """
+
+    # def check(request=%Request{}, parameter, opts \\ [acc: :all])
+    # def check(request=%Request{params: params}, parameter, opts \\ [])
     def check(check = %Check{data: data}, parameter, opts \\ []) do
         value = resolve_value(data, parameter, opts)
         parsed_param = %Parameter{name: parameter, value: value, opts: opts, valid?: true}
@@ -319,5 +312,23 @@ defmodule ApiCommons.Parameter do
     """
     def to_query(tables, parameters, map) do
         
+    end
+
+
+
+
+    @doc """
+        Access the parameters accumulated under given key acc key
+        in the request struct.
+
+        ## Parameter
+            - request (ApiCommons.Request) The request struct with data
+            - acc_key (atom) The key under which parameters where accumulated
+
+        ## Returns
+            - (any) Values accumulated under given key.
+    """
+    def get(request, acc_key) do
+
     end
 end

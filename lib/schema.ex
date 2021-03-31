@@ -5,7 +5,6 @@ defmodule ApiCommons.Schema do
     @success_schema []
 
 
-
     @doc """
         ## JSON Schema
         
