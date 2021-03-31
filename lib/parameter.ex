@@ -52,7 +52,7 @@ defmodule ApiCommons.Parameter do
     def pagination(request = %Request{}, defaults) do
 
         temp_limit = defaults[:limit]
-        limit = if (!is_nil(temp_limit) && tem_limit > 0), do: temp_limit, else: 0
+        limit = if (!is_nil(temp_limit) && temp_limit > 0), do: temp_limit, else: 0
 
         temp_offset = defaults[:offset]
         offset = if limit > 0 && !is_nil(temp_offset) && temp_offset > 0, do: temp_offset, else: 0
