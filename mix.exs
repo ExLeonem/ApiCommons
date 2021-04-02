@@ -1,20 +1,30 @@
 defmodule ApiCommons.MixProject do
   use Mix.Project
 
+  @version "0.1.0"
+
   def project do
     [
       app: :api_commons,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
 
       # Docs
       name: "ApiCommons",
-      source_url: "https://github.com/ExLeonem/ApiCommons",
       docs: [
         main: "ApiCommons",
-        extras: ["README.md"]
+        extras: ["README.md"],
+        groups_for_modules: groups_for_modules(),
+        source_ref: "v#{@version}",
+        source_url: "https://github.com/ExLeonem/ApiCommons",
+        # nest_modules_by_prefix: [
+        #   ApiCommons.Parameter
+        # ]
+        # groups_for_functions: [
+        #   Parameter: & &1[:section] in [:macro, :check, :path, :resolve, :parameter]
+        # ]
       ]
     ]
   end
@@ -34,7 +44,23 @@ defmodule ApiCommons.MixProject do
 
       {:inch_ex, only: :docs},
       {:ecto_sql, "~> 3.4", only: :test},
-      {:ex_doc, "~> 0.24", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.24", only: :dev, runtime: false},
+      {:plug_cowboy, "~> 2.0", only: [:dev, :test]}
+    ]
+  end
+
+
+
+  defp groups_for_modules() do
+    
+    [
+      "ApiCommons.Parameter": [
+        ApiCommons.Parameter.Resolve,
+        ApiCommons.Parameter.Check,
+        ApiCommons.Parameter.Path,
+        ApiCommons.Parameter.Resolve,
+        ApiCommons.Parameter.Macro
+      ]
     ]
   end
 end

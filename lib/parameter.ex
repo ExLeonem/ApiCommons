@@ -1,8 +1,8 @@
 defmodule ApiCommons.Parameter do
 
     @moduledoc """
-        Handle parameters in path & body. Provide checks for availability and values.
-        Parse parameters passed to endpoint calls into a processable format.
+    Handle parameters in path, body and query. Provide checks for availability, types and constraints.
+    
     """
 
     require Logger
@@ -17,54 +17,47 @@ defmodule ApiCommons.Parameter do
     @check_defaults %{position: :all, required?: true, default: nil, type: :string}
     @valid_types  [:string, :integer, :float, :time, :time_usec]
 
-    @default_check_params [
-        type: :string
-    ]
-
-    @doc """
-        Parse single 
-    """
+    
     defstruct [:name, :opts, :error, type: :string, value: nil, valid?: false]
 
+    @type t(name, opts, error, type, value, valid?) :: %Parameter{name: name, opts: opts, error: error, type: type, value: value, valid?: valid?}
 
     @doc """
-        Fetch pagination information. To limit the output.
+    Fetch pagination information. To limit the output.
 
-        [Pagination options](https://www.moesif.com/blog/technical/api-design/REST-API-Design-Filtering-Sorting-and-Pagination/)
+    [Pagination options](https://www.moesif.com/blog/technical/api-design/REST-API-Design-Filtering-Sorting-and-Pagination/)
 
-        ## Parameter
-            - data (map) Received parameter to be processed.
-            - defaults (Keyword) Default parameters when no pagination information was found [limit: 10, offset: 0]
+    ## Parameter
+        - data (map) Received parameter to be processed.
+        - defaults (Keyword) Default parameters when no pagination information was found [limit: 10, offset: 0]
 
-        ## Pagination options
-            - offset (integer) The entity where to begin
-            - limit (integer) The amount of items to return
+    ## Pagination options
+        - offset (integer) The entity where to begin
+        - limit (integer) The amount of items to return
 
-        ## Returns
-            - Request struct for further processing
+    ## Returns
+        - Request struct for further processing
     """
-    def pagination(conn, defaults \\ [limit: 10, offset: 0])
-    def pagination(conn, defaults) do
-        Request.new(conn)
-        |> pagination()
+    def pagination(params, defaults \\ [limit: 10, offset: 0])
+    def pagination(params, defaults) do
+       
     end
 
-    def pagination(request = %Request{}, defaults) do
-
+    def pagination(params = %{} , defaults) do
         temp_limit = defaults[:limit]
         limit = if (!is_nil(temp_limit) && temp_limit > 0), do: temp_limit, else: 0
 
         temp_offset = defaults[:offset]
         offset = if limit > 0 && !is_nil(temp_offset) && temp_offset > 0, do: temp_offset, else: 0
 
-        request
+        params
         |> check(:limit, position: :query, type: :integer, acc: :paginate, default: limit)
         |> check(:offset, position: :query, type: :integer, acc: :paginate, defaul: offset)
     end
 
 
     @doc """
-        
+        Group parameters under filter options.
     """
     def filter(request) do
 
@@ -79,90 +72,79 @@ defmodule ApiCommons.Parameter do
     end
 
 
-    # def check(request, parameter, opts \\ []) do
-        
-    # end
-
     @doc """
-        Check wether or not the given parameter is provided as
-        in the plug connection. 
+    Check wether or not the given parameter is provided as
+    in the plug connection. 
 
-        ## Parameter
-            - conn (Plug.Conn) Provides information about the connection
-            - parameter_name (atom) The parameter name to be checked
-            - opts (Keyword) Additional parameters provided to direct 
+    ## Parameter
+        - conn: Plug.Conn that provides information about the connection.
+        - parameter_name: Atom of the parameter name to be checked.
+        - opts: Keywordlist of additional parameters provided. 
 
 
-        ### Options
-            - in (atom) Position of the parameter value [:path, :query, :body] (use instead of position:)
-            - acc (atom) Accumulate data under this atom, can be later accessed by this key with Request.get(request, acc_key).
+    ### Options
+        - acc: Atom, accumulate data under this atom, can be later accessed by this key with Request.get(request, acc_key).
+        - required? (boolean) Wether or not the parameter to check is required. Defaults to (:false)
+        - default (any()) The default value for given parameter, will only be applied if no value is provided for an optional parameter.
 
-            - position (atom) One value of [:path, :query, :body], indicates the position of the parameter. Defaults to (:path)
-            - required? (boolean) Wether or not the parameter to check is required. Defaults to (:false)
-            - default (any()) The default value for given parameter, will only be applied if no value is provided for an optional parameter.
+        - check (function) A function that performs checks for the parameter
+        - type (any()) The parameter type used to check. 
+        - min (int) Applicable for integer, float and string values (value >= limit)
+        - max (int) Applicable for integer, float and string values (value <= limit)
+        - on_of (list) A list of values to check against
 
-            - check (function) A function that performs checks for the parameter
-            - type (any()) The parameter type used to check. 
-            - min (int) Applicable for integer, float and string values (value >= limit)
-            - max (int) Applicable for integer, float and string values (value <= limit)
-            - on_of (list) A list of values to check against
+    ## Examples
+        
+        You can use parameters located in conn.query_params, conn.path_params and conn.body_params to check
+        parameters at differnt location.
 
-        ## Examples
+        iex> conn.body_params |> Parameter.check(:id, )
+
     """
-
     # def check(request=%Request{}, parameter, opts \\ [acc: :all])
     # def check(request=%Request{params: params}, parameter, opts \\ [])
     def check(check = %Check{data: data}, parameter, opts \\ []) do
-        value = resolve_value(data, parameter, opts)
+        value = resolve_value(data, to_string(parameter))
         parsed_param = %Parameter{name: parameter, value: value, opts: opts, valid?: true}
         |> is_required?()
         |> cast()
         |> in_range()
         |> Check.update(check)
     end
+    def check(check = %Plug.Conn{}, parameter, opts) do
+        
+    end
+
     def check(data, parameter, opts) do
         check_opts = Path.resolve(parameter, opts)
         check(%Check{data: data, schema: nil, opts: check_opts}, parameter, opts)
     end
 
     @doc """
-        Resolve the value of a parameter by it's name.
+    Resolve the value of a parameter by it's name.
 
-        ## Parameter
-            - param (Parameter) 
-            - data ()
-            - opts (Keyword) Keyword list of passed options
-        
-        ## Returns
-            - The value if found in the data or nil
+    ## Parameter
+        - param (Parameter) 
+        - data ()
+        - opts (Keyword) Keyword list of passed options
+    
+    ## Returns
+        - The value if found in the data or nil
     """
-    defp resolve_value(nil, _, _), do: nil
-    defp resolve_value(data, parameter, [position: position]) do
-        sub_values = data[position]
-        _resolve_value(sub_values, parameter)
-    end
-
-    defp resolve_value(data, [head | tail], opts) do
-        sub_values = data[head]
-        |> resolve_value(tail, opts)
-    end
-    defp resolve_value(data, [], _), do: data
-    defp resolve_value(data, parameter, _), do: data[parameter]
-
-    defp _resolve_value(nil, _), do: nil
-    defp _resolve_value(data, []), do: data
-    defp _resolve_value(data, [head | tail]), do: _resolve_value(data[head], tail)
-    defp _resolve_value(data, parameter), do: data[parameter]
+    defp resolve_value(nil, _), do: nil
+    defp resolve_value(data, []), do: data
+    defp resolve_value(data, [head | tail]), do: resolve_value(data[head], tail)
+    defp resolve_value(data, parameter), do: data[parameter]
 
 
     @doc """
-        Check whether or not the parameter is required for processing.
+    Check whether or not the parameter is required for processing.
 
-        ## Parameter
-            - param (Parameter) Parameter struct containing all information about a single parameter check
+    ## Parameter
+        - param (Parameter) Parameter struct containing all information about a single parameter check
 
-        ## Returns
-            - (Parameter) The updated parameter definition
+    ## Returns
+        - (Parameter) The updated parameter definition
 
     """
     defp is_required?(param = %Parameter{valid?: false}), do: param
@@ -179,13 +161,13 @@ defmodule ApiCommons.Parameter do
 
 
     @doc """
-        Cast a parameter to specific type.
+    Cast a parameter to specific type.
 
-        ## Parameter
-            - param (Parameter) 
+    ## Parameter
+        - param (Parameter) 
 
-        ## Returns
-            - 
+    ## Returns
+        - 
     """
     defp cast(param = %Parameter{valid?: false}), do: param
     defp cast(param = %Parameter{name: name, value: value, valid?: true, opts: opts}) do
@@ -217,20 +199,20 @@ defmodule ApiCommons.Parameter do
 
 
     @doc """
-        Turn value into a range comparable value. 
+    Turn value into a range comparable value. 
 
-        ## Parameter
+    ## Parameter
 
-        ## Returns
-            - (int) Integer value to make range comparisons.
+    ## Returns
+        - (int) Integer value to make range comparisons.
 
-        ## Examples
+    ## Examples
 
-        iex> _range_metric("hey", :string)
-        iex> 3
+    iex> _range_metric("hey", :string)
+    iex> 3
 
-        iex> range_metric("helloworld", :string)
-        iex> 8
+    iex> range_metric("helloworld", :string)
+    iex> 8
     """
     defp _range_metric(value, :string), do: String.length(value)
     defp _range_metric(value, type) when type in [:integer, :float], do: value
@@ -239,62 +221,32 @@ defmodule ApiCommons.Parameter do
     end
 
 
-    @doc """
-        Perform checkups of path parameters.
-
-        ## Parameter
-            - received (Map) Parameters received at endpoint
-            - param_name (atom) The name of the parameter to check
-            - opts (Map) Additional options
-
-        ## Opts
-            - position (atom) 
-            - required? (boolean)
-            - default (any)
-            - type (any)
-            - error (function)
-
-        ## Examples
-    """
-    def in_path(params, field, check) do
-        # in_path? = Map.get(params, path)
-
-    end
-
-    def in_path(params, field, check) do
-
-    end
 
 
     @doc """
-        Perform query parameter checkups.
-    """
-    def in_query(received, param_name, opts) do
-    
-    end
-
-
-    @doc """
-        Check the received parameters against an Ecto.Schema.
-        All fields of the schema by default are required, optional fields need to be marked.
+    Check the received parameters against an Ecto.Schema.
+    All fields of the schema by default are required, optional fields need to be marked.
         
-        TODO: 
-            - Take required?/optional from the schema definition?
-            - [References for development](https://github.com/elixir-ecto/ecto/blob/master/lib/ecto/schema.ex)
-            - Use error information provided by changeset function?
+    ## TODO 
+        - Take required?/optional from the schema definition?
+        - [References for development](https://github.com/elixir-ecto/ecto/blob/master/lib/ecto/schema.ex)
+        - Use error information provided by changeset function?
 
-        ## Parameter
-            - received (map) The data received at given endpoint
-            - 
+    ## Parameters
 
-        ## Opts
-            - position (atom) One of [:body, :path, :query, :all], indicating where to take the parameter from
-            - exclude (list(atom)) A list of parameter names as atoms to exclude
-            - optional (list(atom)) A list of parameter names as atoms to mark as optional *deprecated*
-            - endpoint (preload) Set parsing of associations in preload mode. Meaning only keys are required as input by default *deprectaed*
-            - depth (integer) The maximum depth to which to resolve associations (default: 2) 
+        - received: Map containing received data at endpoint.
+        - ecto_schema: Ecto.Schema to check against.
+        - opts: Keywordlist of additional options.
 
-        ## Examples
+    ## Opts
+
+        - position: Atom ,one of [:body, :path, :query, :all], indicating where to take the parameter from
+        - exclude: A list of parameter names as atoms to exclude
+        - optional: A list of parameter names as atoms to mark as optional *deprecated*
+        - endpoint: Set parsing of associations in preload mode. Meaning only keys are required as input by default *deprectaed*
+        - depth: The maximum depth to which to resolve associations (default: 2) 
+
+    ## Examples
     """
     def like_schema(received, ecto_schema, opts \\ %{exclude: [], optional: [], depth: 2}) do
 
@@ -307,7 +259,7 @@ defmodule ApiCommons.Parameter do
 
 
     @doc """
-        Transform parameter validation to a query.
+    Transform parameter validation to a query.
 
     """
     def to_query(tables, parameters, map) do
@@ -318,15 +270,15 @@ defmodule ApiCommons.Parameter do
 
 
     @doc """
-        Access the parameters accumulated under given key acc key
-        in the request struct.
+    Access the parameters accumulated under given key acc key
+    in the request struct.
 
-        ## Parameter
-            - request (ApiCommons.Request) The request struct with data
-            - acc_key (atom) The key under which parameters where accumulated
+    ## Parameter
+        - request (ApiCommons.Request) The request struct with data
+        - acc_key (atom) The key under which parameters where accumulated
 
-        ## Returns
-            - (any) Values accumulated under given key.
+    ## Returns
+        - (any) Values accumulated under given key.
     """
     def get(request, acc_key) do
 

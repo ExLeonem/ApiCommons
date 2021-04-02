@@ -1,14 +1,28 @@
-defmodule ApiCommons.Parameter.Resolve do
-    
-    @moduledoc """
-        Resolve parameters passed to the endpoint.
-    """
-    
+defmodule ApiCommons.Parsers.Schema do
+    @behaviour ApiCommons.Parser
+     
     alias ApiCommons.Parameter.Check
     alias ApiCommons.Utils
     require Logger
 
 
+    @moduledoc """
+    Check parameters against an ecto schema.
+    """
+
+    @doc """
+    
+    """
+    @imp ApiCommons.ParamParser
+    def parse(params, ecto_schema, opts) do
+
+    end
+
+
+       @moduledoc """
+        Resolve parameters passed to the endpoint.
+    """
+   
     @doc section: :resolve
 
     @doc """
@@ -148,5 +162,4 @@ defmodule ApiCommons.Parameter.Resolve do
                 %{to_check | valid?: false, errors: new_errors}
         end
     end
-    
 end

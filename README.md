@@ -39,7 +39,9 @@ This library is an attempt to increase the speed in which REST APIs can be devel
 - [ ] Adding option for configuration to map errors
 
 - [ ] Plug to map errors specific errors to json responses (405, ...)
+- [ ] Map ecto errors to api json error response
 
+- [ ] Generate [Hateoas](#HATEOAS)
 
 
   ```elixir
@@ -138,6 +140,13 @@ defmodule AppWeb.CommentController do
   end
 end
 ```
+
+# HATEOAS
+  - [JSON HAL](https://tools.ietf.org/html/draft-kelly-json-hal-08)
+  - [Collections + JSON](http://amundsen.com/media-types/collection/format/)
+  - [Verbose](https://verbose.readthedocs.io/en/latest/)
+  - [Siren](https://github.com/kevinswiber/siren)
+  - [JSON:API](https://jsonapi.org/)
 
 
 ## Contribution

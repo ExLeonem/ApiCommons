@@ -15,7 +15,7 @@
         alias ApiCommons.Parameter
         alias ApiCommons.Parameter.Path
 
-
+        @doc section: :check
         @doc """
             Save checks on parameters
         """

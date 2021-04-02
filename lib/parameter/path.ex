@@ -1,7 +1,7 @@
 defmodule ApiCommons.Parameter.Path do
 
     
-    
+    @doc section: :path
     @doc """
         
     """
@@ -25,11 +25,12 @@ defmodule ApiCommons.Parameter.Path do
         ## Returns
     """
     def resolve(map, [head | []], value) do
-        Map.put(map, head, value)
+        Map.put(map, String.to_atom(head), value)
     end
     
     def resolve(map, [head | tail], value) do
 
+        head = String.to_atom(head)
         default_map = if Map.has_key?(map, head) do
             Map.get(map, head)
         else
