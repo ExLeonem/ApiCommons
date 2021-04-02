@@ -1,5 +1,4 @@
 defmodule ApiCommons.ParamParser do
 
-    @callback parse(params :: term, ecto_schema :: term, opts :: map()) :: Plug.Conn.t()
-    
+    @callback parse(params :: term, param_definition :: term, opts :: map()) :: term
 end

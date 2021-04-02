@@ -1,9 +1,12 @@
 defmodule ApiCommons.Resource do
-    
+
     @moduledoc """
 
     """
+    
     alias __MODULE__
+    alias ApiCommons.Request
+
     @verbs [:get, :post, :patch, :delete, :options, :connect, :trace, :head]
 
     def init(opts), do: opts
@@ -37,4 +40,24 @@ defmodule ApiCommons.Resource do
             unquote(catch_alls)
         end
     end
+
+
+
+    @doc """
+    Build an API resource.
+
+    Returns: Plug.Conn
+
+    ## Parameter
+        
+    ## 
+    """
+    def build(conn, build_fn) do
+        is_valid? = Request.valid?(conn)
+        if is_valid? do
+            data = Request.data(conn)
+            result = apply(build_fn, [data.parsed])
+        end
+    end
+
 end

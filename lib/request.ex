@@ -21,11 +21,18 @@ defmodule ApiCommons.Request do
 
     """
 
+    @doc """
+    
+    """
     def init(opts), do: opts
 
+    @doc """
+    
+    """
     def call(conn, opts) do
         put_private(conn, @library_data_key, @default_data)
     end
+
 
 
     def headers(conn = %Plug.Conn{req_headers: req_headers}) do
@@ -54,6 +61,13 @@ defmodule ApiCommons.Request do
 
     def data(conn = %Plug.Conn{private: private}) do
         private[@library_data_key]
+    end
+
+
+
+    def valid?(conn = %Plug.Conn{private: private}) do
+        data = private[@library_data_key]
+        if !is_nil(data), do: data[:valid?], else: false
     end
 
 
