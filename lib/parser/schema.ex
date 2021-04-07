@@ -1,6 +1,7 @@
 defmodule ApiCommons.Parsers.Schema do
     @behaviour ApiCommons.Parser
      
+    alias ApiCommons.Request
     alias ApiCommons.Parameter.Check
     alias ApiCommons.Utils
     require Logger
@@ -11,10 +12,19 @@ defmodule ApiCommons.Parsers.Schema do
     """
 
     @doc """
-    
+    Parse received parameters at endpoint against an Ecto.Schema.
+
+
+    ## Parameters
+        - params: 
+        - ecto_schema: Ecto.Schema identifying all fields to be used 
+
+    ## Params
+        - data: Map of parameters to be parsed
+        - schema: Ecto.Schema to be used to parse the data
     """
     @imp ApiCommons.ParamParser
-    def parse(params, ecto_schema, opts) do
+    def parse(params, params) do
 
     end
 

@@ -49,6 +49,24 @@ defmodule ApiCommons do
   end
 
 
+  @doc """
+  Call a specific render function for encoded data in conn
+
+  ## Parameter
+    - conn: Plug.Conn
+    - template: String describe the template to render
+    - params: The parameter to pass to the render function
+  """
+  defmacro render(conn, template, params \\ %{}) do
+    
+    params = params |> Map.put(:conn, conn)
+
+    quote do
+      render(conn, template, params)
+    end
+  end
+
+
   
   @doc """
   Macro to create an rest api endpoint for resource creation.

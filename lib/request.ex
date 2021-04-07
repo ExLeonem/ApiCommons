@@ -1,42 +1,85 @@
 defmodule ApiCommons.Request do
     
     import Plug.Conn
-    alias ApiCommons.Parameter
     alias __MODULE__
-    
+
     @library_data_key :api_commons
-    @default_data %{
-        errors: %{},
-        valid?: true,
-        pagination: %{},
-        resource: %{},
-        filter: %{}
+
+    @type t :: %__MODULE__{
+        errors: map(),
+        valid?: boolean(),
+        parsed: map(),
+        __meta__: map()
     }
 
+    defstruct [
+        errors: %{},
+        valid?: true,
+        parsed: %{},
+        __meta__: %{}
+    ]
+    
+
     @moduledoc """
-        Encapsulate information about an endpoint in Plug.Conn.
+        Describe REST API request information in Plug.Conn.
         Use private field "private" of Plug.Conn.
 
         https://hexdocs.pm/plug/Plug.Conn.html
 
     """
 
+
     @doc """
     
     """
     def init(opts), do: opts
 
+
     @doc """
-    
+    Put initial values into Plug.Conn for further processing.
     """
     def call(conn, opts) do
-        put_private(conn, @library_data_key, @default_data)
+        library_data = Map.from_struct(%__MODULE__{})
+        conn
+        |> put_private(@library_data_key, library_data)
     end
 
 
+    @doc """
+    Create a new request struct from parameters
+    Returns: %Request{}
+    """
+    def new(params) do
+        struct(__MODULE__, params)
+    end
 
-    def headers(conn = %Plug.Conn{req_headers: req_headers}) do
-        req_headers
+
+    @doc """
+    Add base library information Plug.Conn.
+
+    Returns: Plug.Conn
+    """
+    def update(conn = %Plug.Conn{}) do
+
+    end
+
+
+    @doc """
+    Fetch library information from Plug.Conn.
+
+    Returns: {Map, Plug.Conn}
+    """
+    def fetch(conn = %Plug.Conn{private: private_data}) do
+        private_data[@library_data_key]
+    end
+
+
+    # ----------------
+    # Access functions for existing fields
+    # -----------------------------------s
+
+    def header(conn = %Plug.Conn{}, header_key) do
+        get_req_header(conn, header_key)
     end
 
     def method(conn = %Plug.Conn{method: method}) do
@@ -59,16 +102,56 @@ defmodule ApiCommons.Request do
         body_params
     end
 
-    def data(conn = %Plug.Conn{private: private}) do
-        private[@library_data_key]
+
+    # ----------
+    # Access functions for newly added fields
+    # -------------------------------------
+
+    @doc """
+    Access fields of added library data from Plug.Conn.
+    """
+    defp data(conn = %Plug.Conn{private: private}, key, default \\ nil) do
+        private_data = private[@library_data_key]
+
+        if !is_nil(private_data) do
+            private_data[key]
+        else
+            default
+        end
     end
 
 
+    @doc """
+    Is the current request still valid?
 
-    def valid?(conn = %Plug.Conn{private: private}) do
-        data = private[@library_data_key]
-        if !is_nil(data), do: data[:valid?], else: false
+    Returns: boolean
+    """
+    def valid?(conn = %Plug.Conn{}) do
+        data(conn, :valid?, false)
     end
+
+
+    @doc """
+    A map of errors that occured during processing of received parameter.
+
+    Returns: Map
+    """
+    def errors(conn = %Plug.Conn{}) do
+        data(conn, :errors, %{})
+    end
+
+
+    @doc """
+    Parsed pagination information
+    """
+    def pagination(conn = %Plug.Conn{}) do
+        data(conn, :pagination, %{})
+    end
+
+    def filter(conn = %Plug.Conn{}) do
+        data(conn, :filter, %{})
+    end
+
 
 
     @doc """

@@ -49,7 +49,7 @@ defmodule ApiCommons.Resource do
     Returns: Plug.Conn
 
     ## Parameter
-        
+
     ## 
     """
     def build(conn, build_fn) do

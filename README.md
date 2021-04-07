@@ -6,7 +6,8 @@
 <!-- Common operations for fast REST API development and documentation. -->
 
 
-Use ecto schemas to parse and check received parameters.
+Parse received parameters against ecto schemas or manual parameter definitions.
+Automatically generate error responses from errors occured while parsing.
 
 
 [Mongoose-rest-api](https://www.npmjs.com/package/mongoose-rest-api)
@@ -26,22 +27,19 @@ This library is an attempt to increase the speed in which REST APIs can be devel
 
 
 ## Roadmap
-- [ ] Provide functions to check parameters to endpoint
-- [ ] Provide functions to construct a return value for the endpoint
+- [ ] Functions to check parameters manually received at endpoint
+- [ ] Function to check received parameters against ecto.schema
+- [ ] Auto-Generation of error responses
 
 - [ ] Auto generation of endpoints via DSL/macro usage
   - [ ] Common operations create, index, show, delete, update
   - [ ] Auto generate view functions
 
-- [ ] Auto-Generate OpenAPI file from DSL usage
+- [ ] Auto-Generate OpenAPI spec and documentation (from DSL/Function definitions (Compile time inspection of functions without macro?))
 - [ ] Auto-Generate HTML API Documentation
-- [ ] Plug to sync OpenAPI definition and DSL definitions?
-- [ ] Adding option for configuration to map errors
 
-- [ ] Plug to map errors specific errors to json responses (405, ...)
-- [ ] Map ecto errors to api json error response
-
-- [ ] Generate [Hateoas](#HATEOAS)
+- [ ] Map Plug.Conn specific errors to REST error responses (405, ...)
+- [ ] Optionally generate [Hateoas](#HATEOAS) links
 
 
   ```elixir
