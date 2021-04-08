@@ -1,21 +1,22 @@
     defmodule ApiCommons.Parameter.Check do
         @moduledoc """
-            Similar to Ecto.Changeset. Collects and holds information on valid and invalid parameters passed to the endpoint.
-            Collect information on validity of endpoint parameter check ups.
+        Similar to Ecto.Changeset. Collects and holds information on valid and invalid parameters passed to the endpoint.
+        Collect information on validity of endpoint parameter check ups.
 
-            ## Struct Keys
-            - valid? (boolean) Are the provided parameters are valid?
-            - schema (Ecto.Schema|nil) A schema to check parameter against
-            - parsed (Map) The parsed values
-            - opts (List) Additional options passed down
-            - errors - The errors accumulated while checking the parameters
+        ## Struct Keys
+        - valid? (boolean) Are the provided parameters are valid?
+        - schema (Ecto.Schema|nil) A schema to check parameter against
+        - parsed (Map) The parsed values
+        - opts (List) Additional options passed down
+        - errors - The errors accumulated while checking the parameters
 
         """
 
         alias ApiCommons.Parameter
         alias ApiCommons.Parameter.Path
 
-        @doc section: :check
+        
+
         @doc """
             Save checks on parameters
         """

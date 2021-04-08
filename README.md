@@ -41,6 +41,8 @@ This library is an attempt to increase the speed in which REST APIs can be devel
 - [ ] Map Plug.Conn specific errors to REST error responses (405, ...)
 - [ ] Optionally generate [Hateoas](#HATEOAS) links
 
+- [ ] Mix tasks to generate endpoints?
+
 
   ```elixir
     # Check wether parameter of a specific struct

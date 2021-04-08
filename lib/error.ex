@@ -2,6 +2,13 @@ defmodule ApiCommons.Error do
     
 
     @moduledoc """
+
+    ## Parameter parse errors
+
+    - `:
+    
+    ## API Error codes
+    
     ### 3xx
        - 301 (Moved) - REST API model has significantly been redesigned
        - 302 (Found) -
@@ -18,6 +25,11 @@ defmodule ApiCommons.Error do
        - 404 (Not Found) - Can't map URI to a resource
        - 405 (Method Not Allowed) API responds with a 405 error to indicate 
     """
+
+    defstruct [:status_code, :name, :message]
+
+
+
 
     defmodule NotAFunction do
         

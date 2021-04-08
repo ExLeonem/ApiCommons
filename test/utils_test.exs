@@ -61,5 +61,4 @@ defmodule ApiCommons.Endpoint.UtilsTest do
         end
 
     end
-
 end

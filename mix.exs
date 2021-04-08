@@ -29,6 +29,10 @@ defmodule ApiCommons.MixProject do
     ]
   end
 
+  def compiler_paths(:test), do: ["test/helpers"] ++ compiler_paths(:prod)
+  def compiler_paths(_), do: ["lib"]
+  
+
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
@@ -54,12 +58,21 @@ defmodule ApiCommons.MixProject do
   defp groups_for_modules() do
     
     [
-      "ApiCommons.Parameter": [
+      "Parameter": [
         ApiCommons.Parameter.Resolve,
         ApiCommons.Parameter.Check,
         ApiCommons.Parameter.Path,
         ApiCommons.Parameter.Resolve,
-        ApiCommons.Parameter.Macro
+        ApiCommons.Parameter.Macro,
+        ApiCommons.Parameter.Constraint
+      ],
+      "Parser": [
+        ApiCommons.Parser.Schema
+      ],
+      "Error": [
+        ApiCommons.Error.NoSchemaError,
+        ApiCommons.Error.NotAFunction,
+        ApiCommons.Error.UnAuthorized
       ]
     ]
   end

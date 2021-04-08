@@ -2,8 +2,10 @@ defmodule ApiCommons.Request do
     
     import Plug.Conn
     alias __MODULE__
+    alias ApiCommons.Parameter
 
-    @library_data_key :api_commons
+    @library_data_key Mix.Project.config[:app]
+
 
     @type t :: %__MODULE__{
         errors: map(),
@@ -15,8 +17,15 @@ defmodule ApiCommons.Request do
     defstruct [
         errors: %{},
         valid?: true,
-        parsed: %{},
-        __meta__: %{}
+        parsed: %{
+            resource: nil,
+            pagination: nil,
+            filter: nil,
+        },
+        __meta__: %{
+            schema: nil,
+            data: nil,
+        }
     ]
     
 
@@ -59,7 +68,7 @@ defmodule ApiCommons.Request do
 
     Returns: Plug.Conn
     """
-    def update(conn = %Plug.Conn{}) do
+    def update(parameter = %Parameter{}, conn = %Plug.Conn{}) do
 
     end
 
@@ -143,11 +152,18 @@ defmodule ApiCommons.Request do
 
     @doc """
     Parsed pagination information
+
+    Returns: Map
     """
     def pagination(conn = %Plug.Conn{}) do
         data(conn, :pagination, %{})
     end
 
+    @doc """
+    Fetch filter information available.
+
+    Returns: Map
+    """
     def filter(conn = %Plug.Conn{}) do
         data(conn, :filter, %{})
     end
@@ -158,6 +174,37 @@ defmodule ApiCommons.Request do
     Put schema for parameter valdation in Plug.Conn
     """
     def put_schema() do
+
+    end
+
+    @doc """
+    Access parsed data stored in the request struct.
+    
+    ## Parameter
+
+    """
+    def get(request = %Request{parsed: parsed}, key) do
+        parsed[key]
+    end
+
+    def get(conn = %Plug.Conn{}, key, default \\ nil) do
+        lib_data = data(conn, :parsed, default)
+        
+        data_under_key = lib_data[key]
+        if !is_nil(data_under_key) do
+            data_under_key
+        else
+            default
+        end
+    end
+
+    
+    @doc """
+    Remove library information from Plug.Conn.
+    """
+    @type separated :: {map(), Plug.Conn.t()}
+    @spec separate(Plug.Conn.t()) :: tuple()
+    def separate(conn = %Plug.Conn{}) do
 
     end
 

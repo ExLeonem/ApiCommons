@@ -52,7 +52,7 @@ defmodule ApiCommons.Resource do
 
     ## 
     """
-    def build(conn, build_fn) do
+    def create(conn, build_fn) do
         is_valid? = Request.valid?(conn)
         if is_valid? do
             data = Request.data(conn)
@@ -60,4 +60,8 @@ defmodule ApiCommons.Resource do
         end
     end
 
+
+    def query(conn, query_fn) do
+
+    end
 end

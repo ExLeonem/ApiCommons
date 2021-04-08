@@ -131,14 +131,4 @@ defmodule ApiCommons.Utils do
         def includes?(atom_list, field_name) do
             Enum.any?(atom_list, fn x -> field_name == x end)
         end
-
-        
-        @doc """
-            Generate nested map for a access path
-        """
-        # def resolve_name()
-        # def resolve_name([], map), do: map
-        # def resolve_name([head| tail], map) do
-
-        # end
 end
