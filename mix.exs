@@ -10,6 +10,7 @@ defmodule ApiCommons.MixProject do
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      package: package(),
 
       # Docs
       name: "ApiCommons",
@@ -29,10 +30,7 @@ defmodule ApiCommons.MixProject do
     ]
   end
 
-  def compiler_paths(:test), do: ["test/helpers"] ++ compiler_paths(:prod)
-  def compiler_paths(_), do: ["lib"]
   
-
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
@@ -54,6 +52,16 @@ defmodule ApiCommons.MixProject do
   end
 
 
+  defp package() do
+    [
+      maintainers: ["Maksim Sandybekov"],
+      description: "Ease creation of REST API endpoints in phoenix.",
+      licenses: ["MIT"],
+      links: %{
+        GitHub: "https://github.com/ExLeonem/ApiCommons"
+      }
+    ]
+  end
 
   defp groups_for_modules() do
     
@@ -63,11 +71,8 @@ defmodule ApiCommons.MixProject do
         ApiCommons.Parameter.Check,
         ApiCommons.Parameter.Path,
         ApiCommons.Parameter.Resolve,
-        ApiCommons.Parameter.Macro,
-        ApiCommons.Parameter.Constraint
-      ],
-      "Parser": [
-        ApiCommons.Parser.Schema
+        ApiCommons.Parameter.Schema,
+        ApiCommons.Parameter.Constraints,
       ],
       "Error": [
         ApiCommons.Error.NoSchemaError,

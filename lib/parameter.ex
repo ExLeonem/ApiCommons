@@ -41,7 +41,7 @@ defmodule ApiCommons.Parameter do
     Check `single/3`, `like_schema/3`, `like_map/3` for more information.
     """
     @spec check(Plug.Conn.t(), atom() | map() | Schema.schema(), keyword()) :: Plug.Conn.t()
-    def check(conn = %Plug.Conn{}, schema, opts) when is_map(schema), do: like_map(conn, schema, opts)
+    def check(conn = %Plug.Conn{}, parameter, opts) when is_map(parameter), do: like_map(conn, parameter, opts)
     def check(conn = %Plug.Conn{}, parameter, opts) when is_atom(parameter) do
         if Code.ensure_loaded?(parameter) do
             like_schema(conn, parameter, opts)
@@ -74,95 +74,38 @@ defmodule ApiCommons.Parameter do
     defp resolve_value(data, parameter), do: data[parameter]
 
 
-    @doc """
-    Check whether or not the parameter is required for processing.
-
-    ## Parameter
-        - param: Parameter struct containing all information about a single parameter check
-
-    Returns: `%Parameter{}`
-    """
-    def is_required?(param = %Parameter{valid?: false}), do: param
-    def is_required?(param = %Parameter{name: name, value: value, valid?: true, opts: opts}) do
-        required? = opts[:required?]
-        default_value = opts[:default]
-        
-        if (required? && (value || default_value)) || !required? do
-            %{param | value: (value || default_value)}
-        else
-            %{param | valid?: false, error: :required_missing}
-        end
-    end
-
-
-    @doc """
-    Cast a parameter value to specific type.
-
-    ## Examples
-
-        iex> param = %Parameter{name: :test, value: "12", type: :integer}
-        iex> cast(param)
-        %Parameter{
-            name: :test,
-            value: 12,
-            valid?: true,
-            opts: %{}}
-
-        iex> param = %Parameter{name: :test, value: "1k", type: :integer}
-        iex> cast(param)
-        %Parameter{
-            name: :test,
-            valuer: 12,
-            valid?: false,
-            errors: [:cast]}
-
-    """
-    @spec cast(Parameter.t()) :: Parameter.t()
-    def cast(param = %Parameter{valid?: false}), do: param
-    def cast(param = %Parameter{name: name, value: value, valid?: true, opts: opts}) do
-        type = opts[:type]
-        casted_value = Utils.cast(value, type)
-
-        case casted_value do
-            :cast_error -> %{param | error: :cast_error, valid?: false}
-            :invalid_format -> %{param | error: :invalid_format, valid?: false}
-            _ -> %{param | value: casted_value}
-        end
-    end
-
 
     @doc """
     Parse a single parameter from received data
 
-    Returns: `%Plug.Conn{...}`
-
     ## Opts
-    
+    * ':position` - The position of the parameters, one of [:path, :query, :body, :all].
     * `:acc` - Atom, accumulate data under this atom, can be later accessed by this key with Request.get(request, acc_key).
     * `:required?` - boolean Wether or not the parameter to check is required. Defaults to (:false)
     * `:default` - Any value that should be used as the default value
     * `:check` - Function that performs additional checks for the parameter
     * `:type` - Atom representing the expected type of the parameter
+
     * `:min` - Integer
     * `:max` - Integer Applicable for integer, float and string values (value <= limit)
     * `:on_of` - List A list of values to check against
 
     ## Examples
-        
         You can use parameters located in conn.query_params, conn.path_params and conn.body_params to check
         parameters at differnt location.
 
         iex> conn.body_params |> Parameter.check(:id, )
     """
+    @spec single(Plug.Conn.t(), atom(), keyword()) :: Plug.Conn.t()
     def single(conn = %Plug.Conn{}, parameter, opts \\ []) do
         data = Request.fetch_params(conn)
         value = resolve_value(data, to_string(parameter))
         opts = if is_map(opts), do: opts, else: Map.new(opts)
         
         %Parameter{name: parameter, value: value, opts: opts}
-        |> is_required?()
-        |> cast()
-        |> Constraint.in_range()
+        |> Constraints.is_required?()
+        |> Constraints.of_type()
+        |> Constraints.in_range()
         |> Request.update(conn)
 
         # %Parameter{name: parameter, }
@@ -181,7 +124,6 @@ defmodule ApiCommons.Parameter do
     - [ ] Use error information provided by changeset function?
 
     ## Opts
-
     * `:position` - One of [:body, :path, :query, :all], indicating where to take the parameter from
     * `:exclude` - A list of parameter names as atoms to exclude
     * `:optional` - A list of parameter names as atoms to mark as optional *deprecated*
@@ -210,7 +152,15 @@ defmodule ApiCommons.Parameter do
 
     @doc """
     Check received parameters against multiple definitions contained in map.
+
+    ## Opts
+    * `:position` - One of [:body, :path, :query, :all], indicating where to take the parameter from
+    * `:exclude` - A list of parameter names as atoms to exclude
+    * `:optional` - A list of parameter names as atoms to mark as optional *deprecated*
+    * `:endpoint` - Set parsing of associations in preload mode. Meaning only keys are required as input by default *deprectaed*
+    * `:depth` - The maximum depth to which to resolve associations (default: 2) 
     """
+    @spec like_map(Plug.Conn.t(), map(), keyword()) :: Plug.Conn.t()
     def like_map(conn = %Plug.Conn{}, map_def, opts) do
         
     end

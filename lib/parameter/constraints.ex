@@ -1,6 +1,15 @@
-defmodule ApiCommons.Parameter.Constraint do
+defmodule ApiCommons.Parameter.Constraints do
     
     alias ApiCommons.Parameter
+
+    @moduledoc """
+    Check parameter for specific characterstics.
+
+    ## TODO:
+        - [ ] Add functions for :min, :max, :is and :count
+        - [ ] Add functions for :format, :inclusion, :exclusion
+        - [ ] Add functions for :less_than, :less_or_equal_to, :greater_than, :greater_or_equal_to and :equal_to
+    """
 
 
     @constraint_keys [
@@ -20,11 +29,6 @@ defmodule ApiCommons.Parameter.Constraint do
     def validate(param = %Parameter{value: value, opts: opts}) do
         constraints = Keyword.take(opts, [:min, :max, :format, :exclusion, :inclusion, ])
 
-    end
-
-
-    def min(param) do
-        
     end
 
 
@@ -74,4 +78,59 @@ defmodule ApiCommons.Parameter.Constraint do
         # Throw error because, can't check value of given type for range
     end
 
+    @doc """
+    Check whether or not the parameter is required for processing.
+
+    ## Parameter
+        - param: Parameter struct containing all information about a single parameter check
+
+    Returns: `%Parameter{}`
+    """
+    def is_required?(param = %Parameter{valid?: false}), do: param
+    def is_required?(param = %Parameter{name: name, value: value, valid?: true, opts: opts}) do
+        required? = opts[:required?]
+        default_value = opts[:default]
+        
+        if (required? && (value || default_value)) || !required? do
+            %{param | value: (value || default_value)}
+        else
+            %{param | valid?: false, error: :required_missing}
+        end
+    end
+
+
+    @doc """
+    Cast a parameter value to specific type.
+
+    ## Examples
+
+        iex> param = %Parameter{name: :test, value: "12", type: :integer}
+        iex> cast(param)
+        %Parameter{
+            name: :test,
+            value: 12,
+            valid?: true,
+            opts: %{}}
+
+        iex> param = %Parameter{name: :test, value: "1k", type: :integer}
+        iex> cast(param)
+        %Parameter{
+            name: :test,
+            valuer: 12,
+            valid?: false,
+            errors: [:cast]}
+
+    """
+    @spec of_type(Parameter.t()) :: Parameter.t()
+    def of_type(param = %Parameter{valid?: false}), do: param
+    def of_type(param = %Parameter{name: name, value: value, valid?: true, opts: opts}) do
+        type = opts[:type]
+        casted_value = Utils.cast(value, type)
+
+        case casted_value do
+            :cast_error -> %{param | error: :cast_error, valid?: false}
+            :invalid_format -> %{param | error: :invalid_format, valid?: false}
+            _ -> %{param | value: casted_value}
+        end
+    end
 end

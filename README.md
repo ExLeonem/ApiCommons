@@ -6,6 +6,16 @@
 <!-- Common operations for fast REST API development and documentation. -->
 
 
+This library aims to ease the development of REST API's, by providing
+functions to parse Parameters and generate outputs.
+
+--- 
+Ease creation of REST APIs. This library provides functions to 
+
+- Parse received parameters
+- Generation 
+
+--- 
 Parse received parameters against ecto schemas or manual parameter definitions.
 Automatically generate error responses from errors occured while parsing.
 

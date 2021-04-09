@@ -70,19 +70,18 @@ defmodule ApiCommons.ParameterTest do
 
 
     describe "&check/3 map" do
-        
+
 
     end
 
     describe "&check/3 atom" do
 
         test "create script available" do
-            new_conn = ConnUtils.create_conn(:get, "/test")
+            checked = ConnUtils.create_conn(:get, "/test")
             |> ConnUtils.put_body_params(@valid_body_params)
+            |> Parameter.check(:name, required?: true) 
 
-            IO.inspect(new_conn)
-
-            assert new_conn
+            assert checked.private.valid?
         end
 
         # test "valid single parameter check, all defaults" do

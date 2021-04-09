@@ -13,18 +13,6 @@ defmodule ApiCommons do
 
   """
 
-  defmacro __using__(opts) do
-    quote do
-      
-      alias ApiCommons.Parameter
-      alias ApiCommons.Resource
-
-      # Generate non existing functions for create, index, show, delete, ...
-      # With default body
-
-    end
-  end
-
 
   @doc """
   Use a predefined schema as a resource

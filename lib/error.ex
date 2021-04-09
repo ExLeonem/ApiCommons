@@ -7,6 +7,23 @@ defmodule ApiCommons.Error do
 
     - `:
     
+    ### Examples
+
+        [{ 
+            "errorCode": "BAD_FORMAT", 
+            "field": "email", 
+            "originalValue": "suhas.chatekar", 
+            "mesage": "{email} is not in correct format",
+            "helpUrl": "/help/BAD_FORMAT#email" 
+        }]
+
+
+        {
+            "id":      "rate_limit",
+            "message": "Account reached its API rate limit.",
+            "url":     "https://docs.service.com/rate-limits"
+        }
+
     ## API Error codes
     
     ### 3xx
@@ -29,6 +46,9 @@ defmodule ApiCommons.Error do
     defstruct [:status_code, :name, :message]
 
 
+    def new(params) do
+        
+    end
 
 
     defmodule NotAFunction do
