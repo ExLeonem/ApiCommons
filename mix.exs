@@ -72,7 +72,7 @@ defmodule ApiCommons.MixProject do
         ApiCommons.Parameter.Path,
         ApiCommons.Parameter.Resolve,
         ApiCommons.Parameter.Schema,
-        ApiCommons.Parameter.Constraints,
+        ApiCommons.Parameter.Constraint,
       ],
       "Error": [
         ApiCommons.Error.NoSchemaError,

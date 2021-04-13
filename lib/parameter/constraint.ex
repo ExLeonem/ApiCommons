@@ -1,4 +1,4 @@
-defmodule ApiCommons.Parameter.Constraints do
+defmodule ApiCommons.Parameter.Constraint do
 
     alias ApiCommons.Parameter
 
@@ -11,7 +11,7 @@ defmodule ApiCommons.Parameter.Constraints do
         - [ ] Add functions for :less_than, :less_or_equal_to, :greater_than, :greater_or_equal_to and :equal_to
     """
 
-    
+    @any_field_constraints [:required]
     @string_constraints [:min, :max, :is, :format, :inclusion, :exclusion]
     @num_constraints [:less_than, :less_or_equal_to, :greater_than, :greater_or_equal_to, :equal_to]
     # @time_constraints [:before, :after]
@@ -21,11 +21,11 @@ defmodule ApiCommons.Parameter.Constraints do
     Validate constraints for a given parameter.
 
     ## Parameter
-        - value: The value for which to check constraints
-        - type: The type of given value
-        - opts: Additional options
+    - `value`: The value for which to check constraints
+    - `type`: The type of given value
+    - `opts`: Additional options
 
-    Returns: `boolean()`
+    Returns: `boolean`
     """
     @spec validate(any(), atom(), map()) :: boolean()
     def validate(value, type, opts) when type == :string do
@@ -52,10 +52,10 @@ defmodule ApiCommons.Parameter.Constraints do
     Check whether string is at least bigger than the given limit.
 
     ## Parameter
-        - value: String value
-        - size: Integer value representing an lower limit.
+    - `value`: `String` value
+    - `size`: `Integer` value representing an lower limit.
 
-    Returns: `boolean()`
+    Returns: `boolean`
     """
     @spec min(String.t(), integer()) :: boolean()
     def min(value, size), do: String.length(value) > size
@@ -64,10 +64,10 @@ defmodule ApiCommons.Parameter.Constraints do
     Check whether string length is smaller than given value.
 
     ## Parameter
-        - value: String value
-        - size: Integer value representing an upper limit
+    - `value`: `String` value
+    - `size`: `Integer` value representing an upper limit
 
-    Returns: `boolean()`
+    Returns: `boolean`
     """
     @spec max(String.t(), integer()) :: boolean()
     def max(value, size), do: String.length(value) < size
@@ -77,45 +77,45 @@ defmodule ApiCommons.Parameter.Constraints do
     Check whether string is exactly the given size
 
     ## Parameter
-        - value: A string value
-        - size: Integer representing the wanted size
+    - value: A string value
+    - size: Integer representing the wanted size
 
-    Returns `boolean()`
+    Returns `boolean`
     """
     @spec is(String.t(), integer()) :: boolean()
     def is(value, size), do: String.length(value) == size
 
 
     @doc """
-    
+    Check whether given number is smaller than given limit.
+    Returns: `boolean`
     """
     @spec less_than(float() | integer(), integer()) :: boolean()
     def less_than(value, limit), do: value < limit
 
     @doc """
-    
+    Check whether given number is smaller or equal to a limit.
     """
     @spec less_or_equal_to(float() | integer(), integer()) :: boolean()
     def less_or_equal_to(value, limit), do: value <= limit
 
     @doc """
-
+    Check whether given number is greater than a given limit.
     """
     @spec greater_than(float() | integer(), integer()) :: boolean()
     def greater_than(value, limit), do: value > limit
 
     @doc """
-
+    Check whether a given number is greater or equal to a given limit.
     """
     @spec greater_or_equal_to(float() | integer(), integer()) :: boolean()
     def greater_or_equal_to(value, limit), do: value >= limit
 
     @doc """
-
+    Check wether a given number is equal to a limit.
     """
     @spec equal_to(float() | integer(), integer()) :: boolean()
     def equal_to(value, limit), do: value == limit
-
 
     @doc """
     Check if value of given parameter is in a given range.
@@ -172,6 +172,7 @@ defmodule ApiCommons.Parameter.Constraints do
 
     Returns: `%Parameter{}`
     """
+    @spec is_required?(Parameter.t()) :: Parameter.t()
     def is_required?(param = %Parameter{valid?: false}), do: param
     def is_required?(param = %Parameter{name: name, value: value, valid?: true, opts: opts}) do
         required? = opts[:required?]
@@ -183,4 +184,5 @@ defmodule ApiCommons.Parameter.Constraints do
             %{param | valid?: false, error: :required_missing}
         end
     end
+
 end

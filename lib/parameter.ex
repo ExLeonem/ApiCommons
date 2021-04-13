@@ -57,6 +57,24 @@ defmodule ApiCommons.Parameter do
     @valid_types  [:string, :integer, :float, :time, :time_usec]
     @check_defaults [position: :all, required?: true, default: nil, type: :string, acc: :filter]
     
+    @type opts [
+        # Parse configuration
+        position: atom(),
+        default: any(),
+        
+        # Constraints
+        required?: boolean(),
+        type: atom(),
+        min: integer(),
+        max: integer(),
+        is: integer(),
+        less_than: integer(),
+        less_or_equal_than: integer(),
+        greater_than: integer(),
+        grater_or_equal_than: integer(),
+        equal_to: integer()
+    ]
+
     @type error :: [{atom(), String.t()}]
     @type t :: %__MODULE__{
         name: atom(), 
@@ -105,24 +123,43 @@ defmodule ApiCommons.Parameter do
 
 
     @doc """
-    Parse a single parameter from received data
+    Parse a single parameter from received values at endpoint.
 
-    ## Opts
+    ## Parameter
+    - request: A request struct.
+    - parameter: Name of the parameter given as atom.
+    - opts: Keywordlist of additional options.
+
+    ## Options
     * `:position` - The position of the parameters, one of [:path, :query, :body, :all].
     * `:acc` - Atom, accumulate data under this atom, can be later accessed by this key with Request.get(request, acc_key).
-    * `:required?` - boolean Wether or not the parameter to check is required. Defaults to (:false)
     * `:default` - Any value that should be used as the default value
     * `:check` - Function that performs additional checks for the parameter
+
+    ### Constraints
+    * `:required?` - boolean Wether or not the parameter to check is required. Defaults to (:false)
     * `:type` - Atom representing the expected type of the parameter
-    * `:min` - Integer
-    * `:max` - Integer Applicable for integer, float and string values (value <= limit)
-    * `:on_of` - List A list of values to check against
+
+    #### String 
+    * `:min` - Check whether String has minimal length (exclusive). For numeric values use `:less_than` or `:less_or_equal_to`.
+    * `:max` - Check whether String has maximal length (exclusive). For numeric values use `:greater_than` or `:greater_or_equal_to`.
+    * `:is` - Check whether string is of given length. For numeric comparisons use `:equal_to`.
+    * `:counter` - Which value to use to count string length? Allowed values `:grapheme`, `:codepoints` or `:bytes`
+
+    #### Numeric values
+    * `:less_than` - Integer to check against actual parameter value. Is parameter value smaller than :less_than? (exclusive)
+    * `:less_or_equal_to` - Integer to check against actual paramter value. Is parameter value smaller or equal to :less_or_equal_than? (inclusive)
+    * `:greater_than` - Integer to check against actual paramter value. Is parameter value bigger than :greater_than?. (exclusive)
+    * `:greater_or_equal_to` - Integer to check against actual paramter value. Is parameter value greater or equal to :greater_or_equal_than? (inclusive)
+    * `:equal_to` - Is paramter value eqault to integer of :equal_to?
+
 
     ## Examples
         You can use parameters located in conn.query_params, conn.path_params and conn.body_params to check
         parameters at differnt location.
 
         iex> conn.body_params |> Parameter.check(:id, )
+
     """
     @spec single(Request.t(), atom(), keyword()) :: Request.t()
     def single(request = %Request{data: data}, parameter, opts \\ []) when is_atom(parameter) do

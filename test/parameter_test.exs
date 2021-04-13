@@ -23,8 +23,11 @@ defmodule ApiCommons.ParameterTest do
 
     # Schema for test purposes
     defmodule TestSchema do
+        """
+        Mock Schema
+        """
+
         use Ecto.Schema
-        
         alias ApiCommons.ParameterTest.TestAssoc
         
 
@@ -45,7 +48,9 @@ defmodule ApiCommons.ParameterTest do
 
 
     defmodule TestAssoc do
-
+        """
+        Mock Association
+        """
         use Ecto.Schema
 
         schema "test_assoc" do
