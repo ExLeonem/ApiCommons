@@ -1,5 +1,5 @@
 defmodule ApiCommons.Parameter.Constraints do
-    
+
     alias ApiCommons.Parameter
 
     @moduledoc """
@@ -11,25 +11,110 @@ defmodule ApiCommons.Parameter.Constraints do
         - [ ] Add functions for :less_than, :less_or_equal_to, :greater_than, :greater_or_equal_to and :equal_to
     """
 
+    
+    @string_constraints [:min, :max, :is, :format, :inclusion, :exclusion]
+    @num_constraints [:less_than, :less_or_equal_to, :greater_than, :greater_or_equal_to, :equal_to]
+    # @time_constraints [:before, :after]
 
-    @constraint_keys [
-        :min, :max, :is, :count, # String checks
-        :format, :inclusion, :exclusion, # String 
-        :less_than, :less_or_equal_to, :greater_than, :greater_or_equal_to, :equal_to   
-    ]
-
+    
     @doc """
     Validate constraints for a given parameter.
 
     ## Parameter
-        - param: `Parameter` struct encapsulating information
+        - value: The value for which to check constraints
+        - type: The type of given value
+        - opts: Additional options
 
-    Returns: `%Parameter{...}`
+    Returns: `boolean()`
     """
-    def validate(param = %Parameter{value: value, opts: opts}) do
-        constraints = Keyword.take(opts, [:min, :max, :format, :exclusion, :inclusion, ])
-
+    @spec validate(any(), atom(), map()) :: boolean()
+    def validate(value, type, opts) when type == :string do
+        constraints = Keyword.take(opts, @string_constriants) |> Map.new()
+        result = iter(constraints, value, {:ok, value})
     end
+
+    def validate(value, type, opts) when type in [:integer, :float, :decimal] do
+        constraints = Keyword.take(opts, @num_constraints)
+        result = iter(constraints, value, {:ok, value})
+    end
+
+
+    @doc """
+
+    """
+    defp iter([], _param_value, acc), do: acc
+    defp iter([{const_fn_name, value}], param_value, acc) do
+        result = apply(__MODULE__, const_fn_name, [value, param_value])
+    end
+
+
+    @doc """
+    Check whether string is at least bigger than the given limit.
+
+    ## Parameter
+        - value: String value
+        - size: Integer value representing an lower limit.
+
+    Returns: `boolean()`
+    """
+    @spec min(String.t(), integer()) :: boolean()
+    def min(value, size), do: String.length(value) > size
+
+    @doc """
+    Check whether string length is smaller than given value.
+
+    ## Parameter
+        - value: String value
+        - size: Integer value representing an upper limit
+
+    Returns: `boolean()`
+    """
+    @spec max(String.t(), integer()) :: boolean()
+    def max(value, size), do: String.length(value) < size
+
+    
+    @doc """
+    Check whether string is exactly the given size
+
+    ## Parameter
+        - value: A string value
+        - size: Integer representing the wanted size
+
+    Returns `boolean()`
+    """
+    @spec is(String.t(), integer()) :: boolean()
+    def is(value, size), do: String.length(value) == size
+
+
+    @doc """
+    
+    """
+    @spec less_than(float() | integer(), integer()) :: boolean()
+    def less_than(value, limit), do: value < limit
+
+    @doc """
+    
+    """
+    @spec less_or_equal_to(float() | integer(), integer()) :: boolean()
+    def less_or_equal_to(value, limit), do: value <= limit
+
+    @doc """
+
+    """
+    @spec greater_than(float() | integer(), integer()) :: boolean()
+    def greater_than(value, limit), do: value > limit
+
+    @doc """
+
+    """
+    @spec greater_or_equal_to(float() | integer(), integer()) :: boolean()
+    def greater_or_equal_to(value, limit), do: value >= limit
+
+    @doc """
+
+    """
+    @spec equal_to(float() | integer(), integer()) :: boolean()
+    def equal_to(value, limit), do: value == limit
 
 
     @doc """
@@ -78,6 +163,7 @@ defmodule ApiCommons.Parameter.Constraints do
         # Throw error because, can't check value of given type for range
     end
 
+    
     @doc """
     Check whether or not the parameter is required for processing.
 
@@ -95,42 +181,6 @@ defmodule ApiCommons.Parameter.Constraints do
             %{param | value: (value || default_value)}
         else
             %{param | valid?: false, error: :required_missing}
-        end
-    end
-
-
-    @doc """
-    Cast a parameter value to specific type.
-
-    ## Examples
-
-        iex> param = %Parameter{name: :test, value: "12", type: :integer}
-        iex> cast(param)
-        %Parameter{
-            name: :test,
-            value: 12,
-            valid?: true,
-            opts: %{}}
-
-        iex> param = %Parameter{name: :test, value: "1k", type: :integer}
-        iex> cast(param)
-        %Parameter{
-            name: :test,
-            valuer: 12,
-            valid?: false,
-            errors: [:cast]}
-
-    """
-    @spec of_type(Parameter.t()) :: Parameter.t()
-    def of_type(param = %Parameter{valid?: false}), do: param
-    def of_type(param = %Parameter{name: name, value: value, valid?: true, opts: opts}) do
-        type = opts[:type]
-        casted_value = Utils.cast(value, type)
-
-        case casted_value do
-            :cast_error -> %{param | error: :cast_error, valid?: false}
-            :invalid_format -> %{param | error: :invalid_format, valid?: false}
-            _ -> %{param | value: casted_value}
         end
     end
 end

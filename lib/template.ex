@@ -91,9 +91,6 @@ defmodule ApiCommons.Template do
     # end
 
 
-
-
-
     @doc """
     Adds a timestamp to map
 

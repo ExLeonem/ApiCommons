@@ -5,7 +5,8 @@ defmodule ApiCommons.ParameterTest do
     alias ApiCommons.Helpers.ConnUtils
 
     @valid_query_params %{
-    
+        "name" => "hero*",
+        "counter" => ">5"
     }
 
     @valid_body_params %{
@@ -54,90 +55,37 @@ defmodule ApiCommons.ParameterTest do
     end
 
 
-    describe "&check/3 schema" do
-        
-        test "Invalid parameters, missing keys" do
-            values = Map.drop(@valid, ["name"])
-            parameters = Parameter.like_schema(values, TestSchema)
-            refute parameters.valid?
-        end
+    describe "&check/3 single" do
 
-
-        test "Missing associations" do
+        test "Existing parameter" do
+            checked = ConnUtils.create_conn(:get, "/test")
+            |> ConnUtils.put_body_params(@valid_body_params)
+            |> Parameter.check(:name, required?: true)
             
+            assert checked.valid?
         end
+
+        test "Non-existing parameter" do
+            checked = ConnUtils.create_conn(:get, "/test")
+            |> ConnUtils.put_body_params(@vlaid_body_params)
+            |> Parameter.check(:non_existent, required?: true)
+
+            assert checked.valid?
+        end
+
+    end
+
+
+
+    describe "&check/3 schema" do
+
+        
     end
 
 
     describe "&check/3 map" do
 
 
-    end
-
-    describe "&check/3 atom" do
-
-        test "create script available" do
-            checked = ConnUtils.create_conn(:get, "/test")
-            |> ConnUtils.put_body_params(@valid_body_params)
-            |> Parameter.check(:name, required?: true) 
-
-            assert checked.private.valid?
-        end
-
-        # test "valid single parameter check, all defaults" do
-        #     params = %{"name" => "Max Mustermann"}
-        #     test_conn = conn(:get, "/")
-        #     test_conn = Map.put(test_conn, :body_params, @valid_query_params)
-
-        #     checked = Parameter.check(params, :name, type: :string, default: "")
-        #     assert checked.valid?
-        # end
-
-        # test "valid, nested call" do
-        #     params = %{"info" => %{"name" => "John Doe", "description" => "Lorem ipsum, ..."}}
-        #     checked = Parameter.check(params, [:info, :name], type: :string)
-        #     assert checked.valid?
-        # end
-
-        # test "valid missing optional key" do
-        #     params = %{"name" => "hey"}
-        #     checked = Parameter.check(params, :some)
-        #     assert checked.valid?
-        # end
-
-        # test "invalid missing required key" do
-        #     params = %{"name" => "hey"}
-        #     checked = Parameter.check(params, :some, required?: true)
-        #     assert !checked.valid? && checked.errors[:some] == :required_missing
-        # end
-
-        # test "valid missing optional nested key" do
-        #     params = %{"info" => %{"name" => "John Doe", "description" => "Lorem ipsum, ..."}}
-        #     checked = Parameter.check(params, [:info, :more], type: :integer)
-        #     assert checked.valid?
-        # end
-
-        # test "invalid missing required nested key" do
-        #     params = %{"info" => %{"name" => "John Doe", "description" => "Hello world"}}
-        #     checked = Parameter.check(params, [:info, :more], required?: true)
-        #     assert !checked.valid?
-        # end
-
-        # test "option merge on valid check" do
-        #     params = %{"name" => "john doe", title: "hello world"}
-        #     checked = params
-        #     |> Parameter.check(:name, required?: true)
-        #     |> Parameter.check(:title, required?: true)
-        #     assert checked.opts[:name] && checked.opts[:title]
-        # end
-
-        # test "option merge on invalid check" do
-        #     params = %{"name" => "john doe", title: "hello world"}
-        #     checked = params
-        #     |> Parameter.check(:name, required?: true)
-        #     |> Parameter.check(:title, required?: true, type: :integer)
-        #     assert checked.opts[:name] && checked.opts[:title]
-        # end
     end
 
     describe "&check/3 type conversion ::" do

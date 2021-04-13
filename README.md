@@ -5,6 +5,8 @@
 
 <!-- Common operations for fast REST API development and documentation. -->
 
+**Under development** 
+
 
 This library aims to ease the development of REST API's, by providing
 functions to parse Parameters and generate outputs.

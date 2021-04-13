@@ -4,7 +4,6 @@ defmodule ApiCommons do
 
   alias ApiCommons.Schema.Field
   alias ApiCommons.Request
-  alias ApiCommons.Parser.{}
 
   @moduledoc """
   Functions and Macros for quick REST API endpoint generation.

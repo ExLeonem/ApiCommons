@@ -5,7 +5,15 @@ defmodule ApiCommons.Parameter.Schema do
     """
    
     alias ApiCommons.Parameter.Check
+    alias ApiCommons.Request
+
     @doc section: :resolve
+
+
+    def resolve(conn = %Plug.Conn{}) do
+        lib_data = Request.fetch(conn)
+        
+    end
 
     @doc """
         Resolve fields of a schema

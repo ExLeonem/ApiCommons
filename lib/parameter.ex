@@ -1,8 +1,46 @@
 defmodule ApiCommons.Parameter do
 
     @moduledoc """
-    Handle parameters in path, body and query. Provide checks for availability, types and constraints.
-    
+    Parse and check path, query and body parameters received at endpoint.
+
+
+    ## Examples
+    To parse single parameters without defining ecto.schemas either `single/3` or `check/3`.
+
+    ```
+    alias ApiCommons.Parameter
+
+    def index(conn, params) do
+        param_check = conn
+        |> Parameter.check(:name, required?: true) 
+
+        if param_check.valid? do
+
+        else
+
+        end
+    end
+
+    ```
+
+    To check parameter against existing ecto schemes you can use `check/3` or `like_schema/3`.
+
+    ```
+    alias ApiCommons.Parameter
+    alias Repo.Comment, as: CommentSchema
+
+    def create(conn, params) do
+        comment = conn
+        |> Parameter.like_schema(CommentSchema)
+
+        if comment.valid? do
+
+        else
+            
+        end
+    end
+    ```
+
     """
 
     import Plug.Conn
@@ -40,9 +78,18 @@ defmodule ApiCommons.Parameter do
     Optional parameters depending the type of parameter. 
     Check `single/3`, `like_schema/3`, `like_map/3` for more information.
     """
-    @spec check(Plug.Conn.t(), atom() | map() | Schema.schema(), keyword()) :: Plug.Conn.t()
-    def check(conn = %Plug.Conn{}, parameter, opts) when is_map(parameter), do: like_map(conn, parameter, opts)
-    def check(conn = %Plug.Conn{}, parameter, opts) when is_atom(parameter) do
+    @spec check(Plug.Conn.t() | Request.t(), atom() | map() | Schema.schema(), keyword()) :: Plug.Conn.t()
+    
+    def check(conn = %Plug.Conn{}, parameter, opts) when is_map(parameter) do
+        Request.from(conn, parameter) |> Parameter.check(parameter, opts)
+    end
+    def check(conn = %Plug.Conn{}, parameter, opts) do
+        Request.from(conn)
+        |> Parameter.check(parameter, opts)
+    end
+
+    def check(conn = %Request{}, parameter, opts) when is_map(parameter), do: like_map(conn, parameter, opts)
+    def check(conn = %Request{}, parameter, opts) when is_atom(parameter) do
         if Code.ensure_loaded?(parameter) do
             like_schema(conn, parameter, opts)
         else
@@ -50,42 +97,23 @@ defmodule ApiCommons.Parameter do
         end
     end
 
-    def check(data, parameter, opts) when not is_map(parameter) and not is_atom(parameter), 
+    def check(conn, parameter, opts) when not is_map(parameter) and not is_atom(parameter), 
         do: raise ArgumentError, message: "No functions head matching for &check/3. Expected Atom | Module | Ecto.Schema for 'parameter'."
 
-    def check(data, parameter, opts), 
+    def check(conn, parameter, opts), 
         do: raise ArgumentError, message: "No functions head matching for &check/3. Expected Plug.Conn as first parameter."
-
-
-
-    @doc """
-    Resolve the value of a parameter by it's name.
-
-    ## Parameter
-    * `:param` - (Parameter) 
-    * `:data` - ()
-    * `:opts` - (Keyword) Keyword list of passed options
-    
-    Returns: `any() | nil`
-    """
-    defp resolve_value(nil, _), do: nil
-    defp resolve_value(data, []), do: data
-    defp resolve_value(data, [head | tail]), do: resolve_value(data[head], tail)
-    defp resolve_value(data, parameter), do: data[parameter]
-
 
 
     @doc """
     Parse a single parameter from received data
 
     ## Opts
-    * ':position` - The position of the parameters, one of [:path, :query, :body, :all].
+    * `:position` - The position of the parameters, one of [:path, :query, :body, :all].
     * `:acc` - Atom, accumulate data under this atom, can be later accessed by this key with Request.get(request, acc_key).
     * `:required?` - boolean Wether or not the parameter to check is required. Defaults to (:false)
     * `:default` - Any value that should be used as the default value
     * `:check` - Function that performs additional checks for the parameter
     * `:type` - Atom representing the expected type of the parameter
-
     * `:min` - Integer
     * `:max` - Integer Applicable for integer, float and string values (value <= limit)
     * `:on_of` - List A list of values to check against
@@ -96,22 +124,21 @@ defmodule ApiCommons.Parameter do
 
         iex> conn.body_params |> Parameter.check(:id, )
     """
-    @spec single(Plug.Conn.t(), atom(), keyword()) :: Plug.Conn.t()
-    def single(conn = %Plug.Conn{}, parameter, opts \\ []) do
-        data = Request.fetch_params(conn)
+    @spec single(Request.t(), atom(), keyword()) :: Request.t()
+    def single(request = %Request{data: data}, parameter, opts \\ []) when is_atom(parameter) do
         value = resolve_value(data, to_string(parameter))
+        {type, _} = Keyword.pop(opts, :type) 
         opts = if is_map(opts), do: opts, else: Map.new(opts)
         
-        %Parameter{name: parameter, value: value, opts: opts}
-        |> Constraints.is_required?()
-        |> Constraints.of_type()
-        |> Constraints.in_range()
-        |> Request.update(conn)
+        %Parameter{name: :parameter, value: value, type: type || :string, opts: opts}
+        |> cast()
+        |> validate()
+        |> Request.update(request) 
 
         # %Parameter{name: parameter, }
         # [:name, :opts, :error, type: :string, value: nil, valid?: true]
-        # check(%Check{data: data, schema: nil, opts: check_opts}, parameter, opts)
     end
+    def single(request, parameter, opts), do: raise ArgumentError, message: "Error casting single parameter."
 
 
     @doc """
@@ -150,6 +177,7 @@ defmodule ApiCommons.Parameter do
         
     end
 
+
     @doc """
     Check received parameters against multiple definitions contained in map.
 
@@ -164,4 +192,63 @@ defmodule ApiCommons.Parameter do
     def like_map(conn = %Plug.Conn{}, map_def, opts) do
         
     end
+
+
+    @doc """
+    Resolve the value of a parameter by it's name.
+
+    ## Parameter
+    * `:param` - (Parameter) 
+    * `:data` - ()
+    * `:opts` - (Keyword) Keyword list of passed options
+    
+    Returns: `any() | nil`
+    """
+    defp resolve_value(nil, _), do: nil
+    defp resolve_value(data, []), do: data
+    defp resolve_value(data, [head | tail]), do: resolve_value(data[head], tail)
+    defp resolve_value(data, parameter), do: data[parameter]
+
+
+    @doc """
+    Cast a parameter value to specific type.
+
+    ## Examples
+
+        iex> param = %Parameter{name: :test, value: "12", type: :integer}
+        iex> cast(param)
+        %Parameter{
+            name: :test,
+            value: 12,
+            valid?: true,
+            opts: %{}}
+
+        iex> param = %Parameter{name: :test, value: "1k", type: :integer}
+        iex> cast(param)
+        %Parameter{
+            name: :test,
+            valuer: 12,
+            valid?: false,
+            errors: [:cast]}
+
+    """
+    @spec cast(Parameter.t()) :: Parameter.t()
+    defp cast(param = %Parameter{valid?: false}), do: param
+    defp cast(param = %Parameter{name: name, value: value, type: type, valid?: true, opts: opts}) do
+
+        casted_value = Utils.cast(value, type)
+        case casted_value do
+            :cast_error -> %{param | error: :cast_error, valid?: false}
+            :invalid_format -> %{param | error: :invalid_format, valid?: false}
+            _ -> %{param | value: casted_value}
+        end
+    end
+
+
+    @doc """
+    Validate constraints given for parameter definition
+    """
+    @spec validate(Parameter.t()) :: Parameter.t()
+    defp validate(param = %Parameter{valid?: false}), do: param
+    defp validate(param = %Parameter{value: value, type: type, opts: opts}), do: Constraints.validate(value, opts)
 end

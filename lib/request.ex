@@ -1,30 +1,29 @@
 defmodule ApiCommons.Request do
     
+    
     import Plug.Conn
+    alias Plug.Conn.Unfetched
+
     alias __MODULE__
     alias ApiCommons.Parameter
 
     @library_data_key Mix.Project.config[:app]
 
-
     @type t :: %__MODULE__{
+        data: map(),
         errors: map(),
         valid?: boolean(),
         parsed: map(),
-        __meta__: map()
     }
 
     defstruct [
+        data: %{},
         errors: %{},
         valid?: true,
         parsed: %{
             resource: nil,
             pagination: nil,
             filter: nil,
-        },
-        __meta__: %{
-            schema: nil,
-            data: nil,
         }
     ]
     
@@ -33,25 +32,16 @@ defmodule ApiCommons.Request do
         Describe REST API request information in Plug.Conn.
         Use private field "private" of Plug.Conn.
 
+        REST API relevant request headers:
+        * Authorization - Carries credentials containing authentication information
+        * WWW-Authenticate - Sent by server if it needs form of authentication
+        * Accept-Charset - Which character sets are acceptable by the client
+        * Content-Type - Indicates media type (text/html, text/JSON, ...)
+        * Cache-Control - Cache policy defined by the server for this response
+
         https://hexdocs.pm/plug/Plug.Conn.html
 
     """
-
-
-    @doc """
-    
-    """
-    def init(opts), do: opts
-
-
-    @doc """
-    Put initial values into Plug.Conn for further processing.
-    """
-    def call(conn, opts) do
-        library_data = Map.from_struct(%__MODULE__{})
-        conn
-        |> put_private(@library_data_key, library_data)
-    end
 
 
     @doc """
@@ -63,12 +53,28 @@ defmodule ApiCommons.Request do
     end
 
 
+    def from(conn = %Plug.Conn{}, schema \\ nil) do
+        data = fetch_params(conn)
+        %Request{
+            data: data,
+        }
+    end
+
+    
+    def put_schema(request = %Request{}, schema) do
+        
+    end
+
     @doc """
     Add base library information Plug.Conn.
 
     Returns: Plug.Conn
     """
-    def update(parameter = %Parameter{}, conn = %Plug.Conn{}) do
+    def update(parameter = %Parameter{}, request = %Request{}) do
+
+    end
+
+    def update(request = %Request{}, conn = %Plug.Conn{}) do
 
     end
 
@@ -229,11 +235,19 @@ defmodule ApiCommons.Request do
         body_params = conn.body_params
         query_params = conn.query_params
         path_params = conn.path_params
-        
+    
         %{
-            path: path_params,
-            body: body_params,
-            query: query_params
+            path: (if empty_params?(path_params), do: nil, else: path_params),
+            body: (if empty_params?(body_params), do: nil, else: body_params),
+            query: (if empty_params?(query_params), do: nil, else: query_params)
         }
     end
+
+
+    @doc """
+
+    """
+    defp empty_params?(_value = %Plug.Conn.Unfetched{}), do: true
+    defp empty_params?(value = %{}) when map_size(value) == 0, do: true
+    defp empty_params?(_value), do: false
 end

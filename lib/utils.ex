@@ -4,15 +4,16 @@ defmodule ApiCommons.Utils do
         """
 
         require Logger
-        @ecto_types [:id, :binary_id, :integer, :float, :boolean, :string, :binary, :map, :decimal]
 
+        @ecto_types [:id, :binary_id, :integer, :float, :boolean, :string, :binary, :map, :decimal]
+        @error_codes [:cast_error, :wrong_type]
 
         @doc """
-            Check if the passed value is of the schema type.
-
+            Check if the passed value is of given type.
+    
             ## Parameter
-                - field_value (any) Any value to check against
-                - type (Ecto.Type) Field type primitives to check for
+                - field_value: any() value to check against
+                - type: Ecto.Type field primitives to check for, one of [:integer, :float, :string, ....]
         """
         def is_type(field_value, type) do
             case cast(field_value, type) do
@@ -20,7 +21,6 @@ defmodule ApiCommons.Utils do
                 _ -> true
             end
         end
-
 
         @doc """
             Cast value of a paramter to a specific type. 
@@ -36,6 +36,7 @@ defmodule ApiCommons.Utils do
             ## Examples
 
         """ 
+        @spec cast(any(), atom()) :: any()        
         def cast(value, _) when value in [[], {}, %{}, nil] do
             # Empty value
             nil
@@ -43,17 +44,20 @@ defmodule ApiCommons.Utils do
 
         def cast(value, type) when type in [:id, :integer] and is_integer(value), do: value
         def cast(value, type) when type in [:id, :integer] do
-            case Integer.parse(value) do
-                {parsed_value, _} -> parsed_value
+            try do
+                String.to_integer(value)
+            rescue 
                 _ -> :cast_error
             end
         end
 
         def cast(value, :float) when is_float(value), do: value
         def cast(value, :float) do
-            case Float.parse(value) do
-                {parsed_value, _} -> parsed_value
-                _ -> :cast_error
+
+            try do
+                String.to_float(value)
+            rescue
+               _ -> :cast_eror
             end
         end
 
