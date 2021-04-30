@@ -5,25 +5,27 @@ defmodule ApiCommons.Parameter.Path do
     @doc """
         
     """
+    @spec get(map(), list(integer)) :: any()
     def get(map, path) do
         get_in(map, path)
     end
 
 
     @doc """
-        
+    Resolve the given path in an empty map.
+    Creating non-existen keys.
+
+    Returns: `map()`
     """
+    @spec resolve(atom(), any()) :: map()
     def resolve(path, value \\ nil), do: resolve(%{}, path, value)
     
 
     @doc """
-        Resolve the path given for a parameter key into a map structure.
-        Update an existing map with given value    
-
-        ## Parameter
-
-        ## Returns
+    Resolve the path given for a parameter key into a map structure.
+    Update an existing map with given value    
     """
+    @spec resolve(map(), list(), any()) :: map()
     def resolve(map, [head | []], value) do
         Map.put(map, String.to_atom(head), value)
     end

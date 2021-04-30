@@ -6,9 +6,9 @@ defmodule ApiCommons.Parameter.Constraint do
     Check parameter for specific characterstics.
 
     ## TODO:
-        - [ ] Add functions for :min, :max, :is and :count
-        - [ ] Add functions for :format, :inclusion, :exclusion
-        - [ ] Add functions for :less_than, :less_or_equal_to, :greater_than, :greater_or_equal_to and :equal_to
+    - [ ] Add functions for :min, :max, :is and :count
+    - [ ] Add functions for :format, :inclusion, :exclusion
+    - [ ] Add functions for :less_than, :less_or_equal_to, :greater_than, :greater_or_equal_to and :equal_to
     """
 
     @any_field_constraints [:required]
@@ -27,24 +27,41 @@ defmodule ApiCommons.Parameter.Constraint do
 
     Returns: `boolean`
     """
-    @spec validate(any(), atom(), map()) :: boolean()
-    def validate(value, type, opts) when type == :string do
-        constraints = Keyword.take(opts, @string_constriants) |> Map.new()
-        result = iter(constraints, value, {:ok, value})
+    @spec validate(atom(), any(), atom(), map()) :: boolean()
+    def validate(name, value, type, opts) when type == :string do
+        _validate(name, value, opts, @any_field_constraints ++ @string_constraints)
     end
 
-    def validate(value, type, opts) when type in [:integer, :float, :decimal] do
-        constraints = Keyword.take(opts, @num_constraints)
+    def validate(name, value, type, opts) when type in [:integer, :float, :decimal] do
+        _validate(name, value, opts, @any_field_constraints ++ @num_constraints)
+    end
+
+    defp _validate(name, value, opts, constraint_keys) do
+        constraints = Map.take(opts, constraint_keys) |> Map.to_list()
+
+        IO.inspect(constraints)
+        IO.puts("-------")
+
         result = iter(constraints, value, {:ok, value})
+        # Error validating the constraints
+        case result do
+            {:ok, value} -> {:ok, name, value}
+            {:error, code} -> {:error, name, value, code}
+        end
     end
 
 
-    @doc """
-
-    """
+    # Iterate over constraints
+    defp iter(constraints, value, acc \\ {})
     defp iter([], _param_value, acc), do: acc
-    defp iter([{const_fn_name, value}], param_value, acc) do
-        result = apply(__MODULE__, const_fn_name, [value, param_value])
+    defp iter([{const_fn_name, value} | tail], param_value, acc) do
+
+        IO.puts(const_fn_name)
+        result = apply(__MODULE__, const_fn_name, [value, param_value])        
+        IO.inspect(result)
+        IO.puts("------------")
+
+        result
     end
 
 
@@ -58,6 +75,7 @@ defmodule ApiCommons.Parameter.Constraint do
     Returns: `boolean`
     """
     @spec min(String.t(), integer()) :: boolean()
+
     def min(value, size), do: String.length(value) > size
 
     @doc """
@@ -119,9 +137,9 @@ defmodule ApiCommons.Parameter.Constraint do
 
     @doc """
     Check if value of given parameter is in a given range.
-^
+
     ## Parameter
-        - param: Parameter struct encapsulating all information 
+    - param: Parameter struct encapsulating all information 
 
     Returns: `%Parameter{...}`
     """
@@ -144,8 +162,8 @@ defmodule ApiCommons.Parameter.Constraint do
     Turn value into a range comparable value. 
 
     ## Parameter
-        - value: Term representing the parameter value
-        - type: One of possible types 
+    - value: Term representing the parameter value
+    - type: One of possible types 
 
     Returns: integer
 
@@ -163,12 +181,17 @@ defmodule ApiCommons.Parameter.Constraint do
         # Throw error because, can't check value of given type for range
     end
 
+
+
+    def required?(value, true) when is_nil(value), do: {:ok, value}
+    def required?(value, _is_required?), do: {:ok, value}
     
+
     @doc """
     Check whether or not the parameter is required for processing.
 
     ## Parameter
-        - param: Parameter struct containing all information about a single parameter check
+    - param: Parameter struct containing all information about a single parameter check
 
     Returns: `%Parameter{}`
     """

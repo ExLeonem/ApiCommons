@@ -43,10 +43,17 @@ defmodule ApiCommons.Error do
        - 405 (Method Not Allowed) API responds with a 405 error to indicate 
     """
 
-    defstruct [:status_code, :name, :message]
+    defstruct [:code, :name, :message, url: nil, description: nil]
 
 
     def new(params) do
+        struct(__MODULE__, params)
+    end
+
+    @doc """
+    Transform an error 
+    """
+    def transform(error, opts \\ []) do
         
     end
 
@@ -54,6 +61,7 @@ defmodule ApiCommons.Error do
     defmodule NotAFunction do
         
     end
+
 
 
     defmodule UnAuthorized do 

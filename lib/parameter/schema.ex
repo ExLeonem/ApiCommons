@@ -4,8 +4,10 @@ defmodule ApiCommons.Parameter.Schema do
     Resolve parameters passed to the endpoint.
     """
    
-    alias ApiCommons.Parameter.Check
+    alias ApiCommons.Utils
     alias ApiCommons.Request
+
+    alias ApiCommons.Parameter.Check
 
     @doc section: :resolve
 
@@ -27,21 +29,21 @@ defmodule ApiCommons.Parameter.Schema do
     end
 
 
-    @doc """
-        Read information about ecto schema fields.
+    @docp """
+    Read information about ecto schema fields.
 
-        # TODO
-            - [ ] Edge Case: list of values passed, list of maps passed
-            - [ ] Use Changeset to check perform additional checks?
+    # TODO
+    - [ ] Edge Case: list of values passed, list of maps passed
+    - [ ] Use Changeset to check perform additional checks?
 
-        ## Parameters
-            - 
+    ## Parameters
+    - 
 
-        ## Examples
-            - 
+    ## Examples
+    - 
 
-        ## Returns
-            - 
+    ## Returns
+    - 
     """
     defp fields([], checks), do: checks
     defp fields(field_names, checks = %Check{data: data, schema: ecto_schema, opts: opts}) when is_list(data) do
@@ -53,15 +55,12 @@ defmodule ApiCommons.Parameter.Schema do
         end
 
     end
+
     defp fields([field | next_fields], checks = %Check{data: data, schema: ecto_schema, opts: opts}) do
         to_exclude = opts[:exclude]
         is_optional = opts[:optional]
         schema_changeset = ecto_schema.__changeset__
         primary_key = ecto_schema.__schema__(:primary_key)
-
-        """
-            Use information provided in changeset
-        """
 
         # Logger.info("Resolve field (#{field})")
         checks = cond do
@@ -86,7 +85,7 @@ defmodule ApiCommons.Parameter.Schema do
 
 
     @doc """
-        Resolve an assocation to be included into a
+    Resolve an assocation to be included into a
     """
     def assocs(checks = %Check{schema: ecto_schema}) do
         # Collect information from associated
@@ -127,14 +126,13 @@ defmodule ApiCommons.Parameter.Schema do
 
 
     @doc """
-        
-        ## Parameter
-            - from_check (Check) Struct to be merged in the other struct
-            - to_check (Check) The struct to be merged into
-            - opts (Map) Additional options passed
+    ## Parameter
+    - from_check (Check) Struct to be merged in the other struct
+    - to_check (Check) The struct to be merged into
+    - opts (Map) Additional options passed
 
-        ## Options
-            - join (atom) The field used to join the two check structs
+    ## Options
+    - join (atom) The field used to join the two check structs
     """
     defp merge_assoc_checks(from_check, to_check, opts \\ %{}) do
         

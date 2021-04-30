@@ -6,6 +6,7 @@ defmodule ApiCommons.Request do
 
     alias __MODULE__
     alias ApiCommons.Parameter
+    alias ApiCommons.Parameter.Path
 
     @library_data_key Mix.Project.config[:app]
 
@@ -60,23 +61,26 @@ defmodule ApiCommons.Request do
         }
     end
 
-    
-    def put_schema(request = %Request{}, schema) do
-        
-    end
 
     @doc """
     Add base library information Plug.Conn.
 
     Returns: Plug.Conn
     """
-    def update(parameter = %Parameter{}, request = %Request{}) do
-
+    def update({:ok, name, value}, request = %Request{}) do        
+        request
+        |> put_parsed(name, value)
+        
     end
 
-    def update(request = %Request{}, conn = %Plug.Conn{}) do
+    def update({:error, name, value, code}, request = %Request{}) do
+        opts = %{}
+        opts_merged = Map.merge(%{value: value}, opts)
 
+        request
+        |> put_error(name, code, opts)
     end
+
 
 
     @doc """
@@ -178,21 +182,39 @@ defmodule ApiCommons.Request do
 
     @doc """
     Put schema for parameter valdation in Plug.Conn
-    """
-    def put_schema() do
-
+    """   
+    def put_schema(request = %Request{}, schema) do
+        
     end
+
+
+    @doc """
+    Put a new error into the request.
+    """
+    @spec put_error(Request.t(), list(atom) | atom(), atom(), map()) :: Request.t()
+    def put_error(request = %Request{}, field, error, ops) do
+        Map.put()
+    end
+
+
+    @doc """
+    Put a parsed value into the request.
+    """
+    @spec put_parsed(Request.t(), list(atom) | atom, any()) :: Request.t()
+    def put_parsed(request = %Request{}, field, value) do
+        Path.resolve()
+    end
+
 
     @doc """
     Access parsed data stored in the request struct.
-    
-    ## Parameter
-
     """
+    @spec get(Request.t(), list(atom) | atom()) :: any()
     def get(request = %Request{parsed: parsed}, key) do
         parsed[key]
     end
 
+    @spec get(Request.t(), list(atom) | atom(), any()) :: any()
     def get(conn = %Plug.Conn{}, key, default \\ nil) do
         lib_data = data(conn, :parsed, default)
         
@@ -208,7 +230,6 @@ defmodule ApiCommons.Request do
     @doc """
     Remove library information from Plug.Conn.
     """
-    @type separated :: {map(), Plug.Conn.t()}
     @spec separate(Plug.Conn.t()) :: tuple()
     def separate(conn = %Plug.Conn{}) do
 
@@ -228,7 +249,8 @@ defmodule ApiCommons.Request do
 
         ## Examples
     """
-    def fetch_params(conn) do
+    @spec fetch_params(Plug.Conn.t()) :: map()
+    defp fetch_params(conn) do
         # BODY PARAMETERS can be found in conn.body_params
         # QUERY PARAMETERS can be foun din conn.query_params
 

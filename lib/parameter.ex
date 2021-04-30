@@ -57,7 +57,7 @@ defmodule ApiCommons.Parameter do
     @valid_types  [:string, :integer, :float, :time, :time_usec]
     @check_defaults [position: :all, required?: true, default: nil, type: :string, acc: :filter]
     
-    @type opts [
+    @type opts :: [
         # Parse configuration
         position: atom(),
         default: any(),
@@ -287,5 +287,5 @@ defmodule ApiCommons.Parameter do
     """
     @spec validate(Parameter.t()) :: Parameter.t()
     defp validate(param = %Parameter{valid?: false}), do: param
-    defp validate(param = %Parameter{value: value, type: type, opts: opts}), do: Constraints.validate(value, opts)
+    defp validate(param = %Parameter{name: name, value: value, type: type, opts: opts}), do: Constraint.validate(name, value, type, opts)
 end
