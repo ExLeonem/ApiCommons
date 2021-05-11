@@ -163,11 +163,13 @@ defmodule ApiCommons.Parameter do
     """
     @spec single(Request.t(), atom(), keyword()) :: Request.t()
     def single(request = %Request{data: data}, parameter, opts \\ []) when is_atom(parameter) do
+        position = opts[:position]
         value = resolve_value(data, to_string(parameter))
         {type, _} = Keyword.pop(opts, :type) 
         opts = if is_map(opts), do: opts, else: Map.new(opts)
         
-        %Parameter{name: :parameter, value: value, type: type || :string, opts: opts}
+        IO.puts("Value: ")
+        %Parameter{name: parameter, value: value, type: type || :string, opts: opts}
         |> cast()
         |> validate()
         |> Request.update(request) 
@@ -229,6 +231,28 @@ defmodule ApiCommons.Parameter do
     def like_map(conn = %Plug.Conn{}, map_def, opts) do
         
     end
+
+
+    @doc """
+    Get parameter from given position 
+
+    ## Parameter
+    * ':params' - Parameter received at endpoint
+    * ':name' - The name of the parameter to return
+    * ':position' - The position of the parameter, one of [:all, :body, :header, :query]
+
+    Returns `any() | nil`
+    """
+    def get(params, name, position \\ :all)
+    def get(params, name, :all) do
+
+    end
+
+    def get(params, name, position) when position in [:body, :header, :query] do
+        param_map = Map.get(params, position)
+        Path.resolve(param_map, name)
+    end
+
 
 
     @doc """

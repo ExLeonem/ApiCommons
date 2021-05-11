@@ -193,7 +193,11 @@ defmodule ApiCommons.Request do
     """
     @spec put_error(Request.t(), list(atom) | atom(), atom(), map()) :: Request.t()
     def put_error(request = %Request{}, field, error, ops) do
-        Map.put()
+        IO.puts("----\nErrors: ")
+        IO.inspect(request.errors)
+        new_errors = Path.resolve(request.errors, field, error) 
+        IO.inspect(request.errors)
+        request
     end
 
 
@@ -202,7 +206,8 @@ defmodule ApiCommons.Request do
     """
     @spec put_parsed(Request.t(), list(atom) | atom, any()) :: Request.t()
     def put_parsed(request = %Request{}, field, value) do
-        Path.resolve()
+        new_parsed = Path.resolve(request.parsed, field, value)
+        Map.put(request, :parsed, new_parsed)
     end
 
 

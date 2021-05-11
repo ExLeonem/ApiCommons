@@ -62,14 +62,14 @@ defmodule ApiCommons.ParameterTest do
 
     describe "&check/3 single" do
 
-        test "Existing parameter" do
-            checked = ConnUtils.create_conn(:get, "/test")
-            |> ConnUtils.put_body_params(@valid_body_params)
-            |> Parameter.check(:name, required?: true)
+        # test "Existing parameter" do
+        #     checked = ConnUtils.create_conn(:get, "/test")
+        #     |> ConnUtils.put_body_params(@valid_body_params)
+        #     |> Parameter.check(:name, required?: true)
             
-            IO.inspect(checked)
-            assert checked.valid?
-        end
+        #     IO.inspect(checked)
+        #     assert checked.valid?
+        # end
 
         # test "Non-existing parameter" do
         #     checked = ConnUtils.create_conn(:get, "/test")
