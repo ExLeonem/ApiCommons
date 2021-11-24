@@ -25,7 +25,7 @@ defmodule ApiCommons.Template do
     """
     def errors(errors) do
         errors = Enum.map(errors, fn error_def ->
-            _error(error_def.status_code, error_def.name, error_def.message) 
+            _error(error_def.status_code, error_def.name, error_def.message)
         end)
 
         %{
@@ -53,7 +53,7 @@ defmodule ApiCommons.Template do
 
     """
     def default_json_errors(error_codes) do
-        
+
     end
 
 
@@ -75,7 +75,7 @@ defmodule ApiCommons.Template do
     # """
     # def pagination(params, defaults \\ [limit: 10, offset: 0])
     # def pagination(params, defaults) do
-       
+
     # end
 
     # def pagination(params = %{} , defaults) do

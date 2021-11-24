@@ -14,10 +14,29 @@ defmodule ApiCommons do
 
 
   @doc """
+  Create different utilities in file.
+  Depends on the parameters passed.
+
+  """
+  defmacro __using__(which) when is_atom(which) do
+    apply(__MODULE__, which, [])
+  end
+
+
+  @doc """
+  Generate request encapsulating
+  """
+  def request(conn) do
+
+  end
+
+
+
+  @doc """
   Use a predefined schema as a resource
   """
   def resource(conn, ecto_schema, opts) do
-    
+
   end
 
 
@@ -27,7 +46,7 @@ defmodule ApiCommons do
   def build(conn, build_fn) when is_function(build_fn) do
     library_data = conn.private["api_commons"]
     resource_data = Map.get(library_data, :resource)
-    
+
     case apply(build_fn, [resource_data]) do
       {:ok, data} -> data
       {:error, changeset} -> changeset
@@ -40,7 +59,7 @@ defmodule ApiCommons do
 
   @doc """
     Query entities returns the result
-    
+
   """
   def query() do
 
@@ -56,7 +75,7 @@ defmodule ApiCommons do
     - params: The parameter to pass to the render function
   """
   defmacro render(conn, template, params \\ %{}) do
-    
+
     params = params |> Map.put(:conn, conn)
 
     quote do
@@ -65,12 +84,21 @@ defmodule ApiCommons do
   end
 
 
-  
+  defmacro render(%Request{} = request) do
+    # IO.inspect(__CALLER__.))
+
+    conn = request[:conn]
+    quote do
+      render(unquote(conn), "400.json", [])
+    end
+  end
+
+
   @doc """
   Macro to create an rest api endpoint for resource creation.
   """
   defmacro create() do
-    
+
   end
 
 
@@ -78,7 +106,7 @@ defmodule ApiCommons do
   Macro to create an rest api endpoint for resource display.
   """
   defmacro show() do
-    
+
   end
 
 
@@ -90,7 +118,7 @@ defmodule ApiCommons do
     - params (Map) Parameters to modify the output
   """
   defmacro index() do
-    
+
   end
 
 
@@ -98,7 +126,7 @@ defmodule ApiCommons do
   Macro to delete a resource.
   """
   defmacro delete() do
-    
+
   end
 
 
@@ -106,6 +134,6 @@ defmodule ApiCommons do
   Macto to update a resource
   """
   defmacro put() do
-    
+
   end
 end

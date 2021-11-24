@@ -16,7 +16,7 @@ defmodule ApiCommons.Parameter.Constraint do
     @num_constraints [:less_than, :less_or_equal_to, :greater_than, :greater_or_equal_to, :equal_to]
     # @time_constraints [:before, :after]
 
-    
+
     @doc """
     Validate constraints for a given parameter.
 
@@ -57,7 +57,7 @@ defmodule ApiCommons.Parameter.Constraint do
     defp iter([{const_fn_name, value} | tail], param_value, acc) do
 
         IO.puts(const_fn_name)
-        result = apply(__MODULE__, const_fn_name, [value, param_value])        
+        result = apply(__MODULE__, const_fn_name, [value, param_value])
         IO.inspect(result)
         IO.puts("------------")
 
@@ -75,7 +75,6 @@ defmodule ApiCommons.Parameter.Constraint do
     Returns: `boolean`
     """
     @spec min(String.t(), integer()) :: boolean()
-
     def min(value, size), do: String.length(value) > size
 
     @doc """
@@ -90,7 +89,7 @@ defmodule ApiCommons.Parameter.Constraint do
     @spec max(String.t(), integer()) :: boolean()
     def max(value, size), do: String.length(value) < size
 
-    
+
     @doc """
     Check whether string is exactly the given size
 
@@ -139,7 +138,7 @@ defmodule ApiCommons.Parameter.Constraint do
     Check if value of given parameter is in a given range.
 
     ## Parameter
-    - param: Parameter struct encapsulating all information 
+    - param: Parameter struct encapsulating all information
 
     Returns: `%Parameter{...}`
     """
@@ -159,11 +158,11 @@ defmodule ApiCommons.Parameter.Constraint do
 
 
     @doc """
-    Turn value into a range comparable value. 
+    Turn value into a range comparable value.
 
     ## Parameter
     - value: Term representing the parameter value
-    - type: One of possible types 
+    - type: One of possible types
 
     Returns: integer
 
@@ -185,7 +184,7 @@ defmodule ApiCommons.Parameter.Constraint do
 
     def required?(value, true) when is_nil(value), do: {:ok, value}
     def required?(value, _is_required?), do: {:ok, value}
-    
+
 
     @doc """
     Check whether or not the parameter is required for processing.
@@ -200,7 +199,7 @@ defmodule ApiCommons.Parameter.Constraint do
     def is_required?(param = %Parameter{name: name, value: value, valid?: true, opts: opts}) do
         required? = opts[:required?]
         default_value = opts[:default]
-        
+
         if (required? && (value || default_value)) || !required? do
             %{param | value: (value || default_value)}
         else

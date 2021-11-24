@@ -39,6 +39,7 @@ This library is an attempt to increase the speed in which REST APIs can be devel
 
 
 ## Roadmap
+- [ ] Bare minimum working schema/parameter
 - [ ] Functions to check parameters manually received at endpoint
 - [ ] Function to check received parameters against ecto.schema
 - [ ] Auto-Generation of error responses
@@ -89,9 +90,17 @@ be found at [https://hexdocs.pm/api_commons](https://hexdocs.pm/api_commons).
 | Function | Description
 | --- | ---
 | &check/3 | Check received parameter list for a single parameter
+| &single/3 | Check single parameter definitions
 | &like_schema/3 | Check received parameters against ecto schema
+| &like_map/3 | Check parameter against map like definition.
+
+</br>
+</br>
+
+### &check/3
 
 
+### Example
 
 ```elixir
 
@@ -130,6 +139,16 @@ end
 
 ```
 
+### &single/3
+
+
+### Example
+
+
+### &like_schema/3
+
+### Example
+
 
 ```elixir
 
@@ -141,7 +160,7 @@ defmodule AppWeb.CommentController do
 
   def create(conn, params) do
     param_checks = params
-    |> Parameter.like_json(Comment)
+    |> Parameter.like_schema(Comment)
 
     # Render either error view or the entity
     if param_checks.valid? do

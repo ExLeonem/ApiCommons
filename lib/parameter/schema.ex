@@ -6,7 +6,6 @@ defmodule ApiCommons.Parameter.Schema do
    
     alias ApiCommons.Utils
     alias ApiCommons.Request
-
     alias ApiCommons.Parameter.Check
 
     @doc section: :resolve
@@ -14,8 +13,9 @@ defmodule ApiCommons.Parameter.Schema do
 
     def resolve(conn = %Plug.Conn{}) do
         lib_data = Request.fetch(conn)
-        
+        lib_data
     end
+
 
     @doc """
         Resolve fields of a schema
@@ -29,7 +29,7 @@ defmodule ApiCommons.Parameter.Schema do
     end
 
 
-    @docp """
+    @doc """
     Read information about ecto schema fields.
 
     # TODO
@@ -39,11 +39,7 @@ defmodule ApiCommons.Parameter.Schema do
     ## Parameters
     - 
 
-    ## Examples
-    - 
-
-    ## Returns
-    - 
+    Returns: 
     """
     defp fields([], checks), do: checks
     defp fields(field_names, checks = %Check{data: data, schema: ecto_schema, opts: opts}) when is_list(data) do
@@ -83,7 +79,6 @@ defmodule ApiCommons.Parameter.Schema do
     end
 
 
-
     @doc """
     Resolve an assocation to be included into a
     """
@@ -92,6 +87,7 @@ defmodule ApiCommons.Parameter.Schema do
         ecto_schema.__schema__(:associations)
         |> assocs(checks)
     end
+
 
     @doc """
 
@@ -150,5 +146,4 @@ defmodule ApiCommons.Parameter.Schema do
                 %{to_check | valid?: false, errors: new_errors}
         end
     end
-
 end
