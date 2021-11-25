@@ -163,12 +163,13 @@ defmodule ApiCommons.Parameter do
     @spec single(Request.t(), atom(), keyword()) :: Request.t()
     def single(request = %Request{}, parameter, opts \\ []) when is_atom(parameter) do
         position = opts[:position]
-        value = Resolve.params(request, position || :all)
+        # value = Resolve.params(request, position || :all)
+        value = get(request.data, parameter, position || :body)
         {type, _} = Keyword.pop(opts, :type)
         opts = if is_map(opts), do: opts, else: Map.new(opts)
 
-        IO.puts("Value: ")
-        %Parameter{name: parameter, value: value, type: type || :string, opts: opts}
+
+        output = %Parameter{name: parameter, value: value, type: type || :string, opts: opts}
         |> cast()
         |> validate()
         |> Request.update(request)
@@ -233,11 +234,11 @@ defmodule ApiCommons.Parameter do
 
 
     @doc """
-    Get parameter from given position
+    Get parameter from given position.
 
     ## Parameter
-    * ':params' - Parameter received at endpoint
-    * ':name' - The name of the parameter to return
+    * ':params' - Parameters received from the endpoints.
+    * ':name' - The name of the parameter to return.
     * ':position' - The position of the parameter, one of [:all, :body, :header, :query]
 
     Returns `any() | nil`
@@ -249,7 +250,7 @@ defmodule ApiCommons.Parameter do
 
     def get(params, name, position) when position in [:body, :header, :query] do
         param_map = Map.get(params, position)
-        Path.resolve(param_map, name)
+        resolve_value(param_map, name)
     end
 
 
@@ -266,8 +267,13 @@ defmodule ApiCommons.Parameter do
     """
     defp resolve_value(nil, _), do: nil
     defp resolve_value(data, []), do: data
-    defp resolve_value(data, [head | tail]), do: resolve_value(data[head], tail)
-    defp resolve_value(data, parameter), do: data[parameter]
+    defp resolve_value(data, [head | tail]), do: resolve_value(data[key_to_string(head)], tail)
+    defp resolve_value(data, parameter), do: data[key_to_string(parameter)]
+
+
+    defp key_to_string(key) when is_atom(key), do: Atom.to_string(key)
+    defp key_to_string(key), do: key
+
 
 
     @doc """

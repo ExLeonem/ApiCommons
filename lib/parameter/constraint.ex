@@ -11,7 +11,7 @@ defmodule ApiCommons.Parameter.Constraint do
     - [ ] Add functions for :less_than, :less_or_equal_to, :greater_than, :greater_or_equal_to and :equal_to
     """
 
-    @any_field_constraints [:required]
+    @any_field_constraints [:required?]
     @string_constraints [:min, :max, :is, :format, :inclusion, :exclusion]
     @num_constraints [:less_than, :less_or_equal_to, :greater_than, :greater_or_equal_to, :equal_to]
     # @time_constraints [:before, :after]
@@ -38,11 +38,8 @@ defmodule ApiCommons.Parameter.Constraint do
 
     defp _validate(name, value, opts, constraint_keys) do
         constraints = Map.take(opts, constraint_keys) |> Map.to_list()
+        result = iter(constraints, value)
 
-        IO.inspect(constraints)
-        IO.puts("-------")
-
-        result = iter(constraints, value, {:ok, value})
         # Error validating the constraints
         case result do
             {:ok, value} -> {:ok, name, value}
@@ -52,16 +49,20 @@ defmodule ApiCommons.Parameter.Constraint do
 
 
     # Iterate over constraints
-    defp iter(constraints, value, acc \\ {})
-    defp iter([], _param_value, acc), do: acc
-    defp iter([{const_fn_name, value} | tail], param_value, acc) do
+    defp iter(constraints, value)
+    defp iter([], param_value), do: {:ok, param_value}
+    defp iter([{const_fn_name, value} | tail], param_value) do
 
-        IO.puts(const_fn_name)
-        result = apply(__MODULE__, const_fn_name, [value, param_value])
-        IO.inspect(result)
-        IO.puts("------------")
+        IO.puts(value)
+        IO.puts(param_value)
 
-        result
+        result = apply(__MODULE__, const_fn_name, [param_value, value])
+        # IO.puts(const_fn_name, label: "Constraint")
+        # IO.puts(result, label: "Output")
+        case result do
+            {:ok, value} -> iter(tail, param_value)
+            {:error, msg} -> {:error, msg}
+        end
     end
 
 
@@ -75,7 +76,10 @@ defmodule ApiCommons.Parameter.Constraint do
     Returns: `boolean`
     """
     @spec min(String.t(), integer()) :: boolean()
-    def min(value, size), do: String.length(value) > size
+    def min(value, size), do: _min(String.length(value) > size, value, size)
+    defp _min(false, value, size), do: {:error, "String #{value} is not smaller than #{size}."}
+    defp _min(true, value, size), do: {:ok, value}
+
 
     @doc """
     Check whether string length is smaller than given value.
@@ -182,8 +186,16 @@ defmodule ApiCommons.Parameter.Constraint do
 
 
 
-    def required?(value, true) when is_nil(value), do: {:ok, value}
-    def required?(value, _is_required?), do: {:ok, value}
+    @doc """
+    Check whether a value was passed for the required value.
+
+    Returns: boolean()
+    """
+    def required?(value, true), do: _required?(!is_nil(value), value)
+    def required?(value, _is_required?), do: _required?(true, value)
+
+    def _required?(true, value), do: {:ok, value}
+    def _required?(false, value), do: {:error, "Required value is not existent."}
 
 
     @doc """

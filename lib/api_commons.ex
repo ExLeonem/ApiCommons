@@ -66,25 +66,35 @@ defmodule ApiCommons do
   end
 
 
+  # @doc """
+  # Call a specific render function for encoded data in conn
+
+  # ## Parameter
+  #   - conn: Plug.Conn
+  #   - template: String describe the template to render
+  #   - params: The parameter to pass to the render function
+  # """
+  # defmacro render(conn, template, params \\ %{}) do
+
+  #   params = params |> Map.put(:conn, conn)
+
+  #   quote do
+  #     render(conn, template, params)
+  #   end
+  # end
+
+
   @doc """
-  Call a specific render function for encoded data in conn
 
   ## Parameter
-    - conn: Plug.Conn
-    - template: String describe the template to render
-    - params: The parameter to pass to the render function
+    - request: ApiCommons.Request a processed request.
+    - opts: Keyword list of options to render for
+
+  ## Opts
+    - data: The data to parse to the template
+    - template: A a code to match against rander functions in view.
   """
-  defmacro render(conn, template, params \\ %{}) do
-
-    params = params |> Map.put(:conn, conn)
-
-    quote do
-      render(conn, template, params)
-    end
-  end
-
-
-  defmacro render(%Request{} = request) do
+  defmacro render(%Request{} = request, opts \\ []) do
     # IO.inspect(__CALLER__.))
 
     conn = request[:conn]

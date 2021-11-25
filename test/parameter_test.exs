@@ -29,7 +29,7 @@ defmodule ApiCommons.ParameterTest do
 
         use Ecto.Schema
         alias ApiCommons.ParameterTest.TestAssoc
-        
+
 
         schema "test_schema" do
             field :name, :string
@@ -62,29 +62,30 @@ defmodule ApiCommons.ParameterTest do
 
     describe "&check/3 single" do
 
-        # test "Existing parameter" do
-        #     checked = ConnUtils.create_conn(:get, "/test")
-        #     |> ConnUtils.put_body_params(@valid_body_params)
-        #     |> Parameter.check(:name, required?: true)
-            
-        #     IO.inspect(checked)
-        #     assert checked.valid?
-        # end
+        test "Existing parameter" do
+            checked = ConnUtils.create_conn(:get, "/test")
+            |> ConnUtils.put_body_params(@valid_body_params)
+            |> Parameter.check(:name, required?: true)
 
-        # test "Non-existing parameter" do
-        #     checked = ConnUtils.create_conn(:get, "/test")
-        #     |> ConnUtils.put_body_params(@vlaid_body_params)
-        #     |> Parameter.check(:non_existent, required?: true)
+            assert checked.valid? && checked.parsed[:name] == "test"
+        end
 
-        #     assert checked.valid?
-        # end
+        test "Non-existing parameter" do
+            checked = ConnUtils.create_conn(:get, "/test")
+            |> ConnUtils.put_body_params(@vlaid_body_params)
+            |> Parameter.check(:non_existent, required?: true)
+
+            IO.inspect(checked)
+
+            assert checked.valid?
+        end
     end
 
 
 
     describe "&check/3 schema" do
 
-        
+
     end
 
 
@@ -98,7 +99,7 @@ defmodule ApiCommons.ParameterTest do
         # test "valid string to integer" do
         #     params = %{"age" => "12"}
         #     checked = Parameter.check(params, :age, type: :integer)
-        #     assert checked.valid? 
+        #     assert checked.valid?
         # end
 
         # test "invalid string to integer" do

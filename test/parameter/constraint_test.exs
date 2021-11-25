@@ -7,19 +7,19 @@ defmodule ApiCommons.Parameter.ConstraintTest do
 
 
     describe "&min/2" do
-        
+
         test "String fullfills constraint" do
-            assert Constraint.min("hello", 2)
+            assert {:ok, _value} = Constraint.min("hello", 2)
         end
 
         test "String does not fullfill constraint" do
-            assert !Constraint.min("hello", 10)
+            assert {:error, _msg} = Constraint.min("hello", 10)
         end
     end
 
 
     describe "&max/2" do
-       
+
         test "String fullfills constraint" do
             assert Constraint.max("hello", 20)
         end
@@ -31,9 +31,9 @@ defmodule ApiCommons.Parameter.ConstraintTest do
 
 
     describe "&is/2" do
-    
+
         test "String fullfills constraint" do
-            assert Constraint.is("hello", 5)            
+            assert Constraint.is("hello", 5)
         end
 
         test "String does not fullfill constraint" do
@@ -55,19 +55,19 @@ defmodule ApiCommons.Parameter.ConstraintTest do
 
 
     describe "&less_than_or_equal/2" do
-    
+
         test "Number does fullfill constaint" do
             assert Constraint.less_or_equal_to(12, 12)
         end
 
         test "Number does not full constraint" do
-            assert !Constraint.less_or_equal_to(12.2, 12)            
+            assert !Constraint.less_or_equal_to(12.2, 12)
         end
     end
 
 
     describe "&greater_than/2" do
-        
+
         test "Number does fullfill constraint" do
             assert Constraint.greater_than(12, 11)
         end
@@ -79,7 +79,7 @@ defmodule ApiCommons.Parameter.ConstraintTest do
 
 
     describe "&greater_or_equal_to/2" do
-        
+
         test "Number does fulfill constraint" do
             assert Constraint.greater_or_equal_to(12, 12)
         end
@@ -103,7 +103,7 @@ defmodule ApiCommons.Parameter.ConstraintTest do
 
 
     describe "&is_required?/1" do
-        
+
         test "Valid. Required, not set but default given." do
             param = %Parameter{name: :test, value: nil, opts: %{default: 12, required?: true}}
             new_param = Constraint.is_required?(param)
