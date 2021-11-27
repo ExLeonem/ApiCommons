@@ -4,13 +4,15 @@ defmodule ApiCommons.Utils do
         """
 
         require Logger
+        alias ApiCommons.Parameter
+
 
         @ecto_types [:id, :binary_id, :integer, :float, :boolean, :string, :binary, :map, :decimal]
         @error_codes [:cast_error, :wrong_type]
 
         @doc """
             Check if the passed value is of given type.
-    
+
             ## Parameter
                 - field_value: any() value to check against
                 - type: Ecto.Type field primitives to check for, one of [:integer, :float, :string, ....]
@@ -22,8 +24,9 @@ defmodule ApiCommons.Utils do
             end
         end
 
+
         @doc """
-            Cast value of a paramter to a specific type. 
+            Cast value of a paramter to a specific type.
             If value already of specified type, just return the value
 
             ## Parameter
@@ -35,8 +38,8 @@ defmodule ApiCommons.Utils do
 
             ## Examples
 
-        """ 
-        @spec cast(any(), atom()) :: any()        
+        """
+        @spec cast(any(), atom()) :: any()
         def cast(value, _) when value in [[], {}, %{}, nil] do
             # Empty value
             nil
@@ -46,7 +49,7 @@ defmodule ApiCommons.Utils do
         def cast(value, type) when type in [:id, :integer] do
             try do
                 String.to_integer(value)
-            rescue 
+            rescue
                 _ -> :cast_error
             end
         end
@@ -84,7 +87,7 @@ defmodule ApiCommons.Utils do
 
         def cast(value, :map) when is_map(value), do: value
         def cast(value, :map) do
-            
+
         end
 
         def cast(value, {:map, mappings}) do
@@ -108,7 +111,7 @@ defmodule ApiCommons.Utils do
             end
         end
         def cast(value, type) when type in [:time, :time_usec], do: :wrong_type
-        
+
         def cast(value, type) do
             # No value matched, throw an error
             value
@@ -126,7 +129,7 @@ defmodule ApiCommons.Utils do
 
 
             ## Examples
-    
+
         """
         def includes?(nil, field_name), do: false
         def includes?([], field_name), do: false
@@ -135,4 +138,17 @@ defmodule ApiCommons.Utils do
         def includes?(atom_list, field_name) do
             Enum.any?(atom_list, fn x -> field_name == x end)
         end
+
+
+
+        @doc """
+        Transforms an atom key to a string.
+
+        ## Parameter
+        * `key` - The key to be parsed into a string.
+
+        Returns: String.t()
+        """
+        def key_to_string(key) when is_atom(key), do: Atom.to_string(key)
+        def key_to_string(key), do: key
 end

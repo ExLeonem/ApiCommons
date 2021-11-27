@@ -33,6 +33,16 @@ defmodule ApiCommons do
 
 
   @doc """
+  Perform a custom action on a given parameter.
+
+  """
+  def use(%Request{}, param_name, fn_call) do
+
+  end
+
+
+
+  @doc """
   Use a predefined schema as a resource
   """
   def resource(conn, ecto_schema, opts) do

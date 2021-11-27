@@ -43,7 +43,6 @@ This library is an attempt to increase the speed in which REST APIs can be devel
 - [ ] Functions to check parameters manually received at endpoint
 - [ ] Function to check received parameters against ecto.schema
 - [ ] Auto-Generation of error responses
-
 - [ ] Auto generation of endpoints via DSL/macro usage
   - [ ] Common operations create, index, show, delete, update
   - [ ] Auto generate view functions

@@ -21,11 +21,11 @@ defmodule ApiCommons.Parameter.ConstraintTest do
     describe "&max/2" do
 
         test "String fullfills constraint" do
-            assert Constraint.max("hello", 20)
+            assert {:ok, _} = Constraint.max("hello", 20)
         end
 
         test "String does not fullfill constrain" do
-            assert !Constraint.max("hello", 2)
+            assert {:error, _} = Constraint.max("hello", 2)
         end
     end
 
@@ -33,11 +33,11 @@ defmodule ApiCommons.Parameter.ConstraintTest do
     describe "&is/2" do
 
         test "String fullfills constraint" do
-            assert Constraint.is("hello", 5)
+            assert {:ok, _} = Constraint.is("hello", 5)
         end
 
         test "String does not fullfill constraint" do
-            assert !Constraint.is("hello", 6)
+            assert {:error, _} = Constraint.is("hello", 6)
         end
     end
 
@@ -45,11 +45,11 @@ defmodule ApiCommons.Parameter.ConstraintTest do
     describe "&less_than/2" do
 
         test "Number does fullfills constraint" do
-            assert Constraint.less_than(12.99, 13)
+            assert {:ok, _} = Constraint.less_than(12.99, 13)
         end
 
         test "Number does not fullfill constraint" do
-            assert !Constraint.less_than(12, 12)
+            assert {:error, _} = Constraint.less_than(12, 12)
         end
     end
 
@@ -57,11 +57,11 @@ defmodule ApiCommons.Parameter.ConstraintTest do
     describe "&less_than_or_equal/2" do
 
         test "Number does fullfill constaint" do
-            assert Constraint.less_or_equal_to(12, 12)
+            assert {:ok, _} = Constraint.less_or_equal_to(12, 12)
         end
 
         test "Number does not full constraint" do
-            assert !Constraint.less_or_equal_to(12.2, 12)
+            assert {:error, _} = Constraint.less_or_equal_to(12.2, 12)
         end
     end
 
@@ -69,11 +69,11 @@ defmodule ApiCommons.Parameter.ConstraintTest do
     describe "&greater_than/2" do
 
         test "Number does fullfill constraint" do
-            assert Constraint.greater_than(12, 11)
+            assert {:ok, _} = Constraint.greater_than(12, 11)
         end
 
         test "Number does not fullfill constraint" do
-            assert !Constraint.greater_than(12, 12)
+            assert {:error, _} = Constraint.greater_than(12, 12)
         end
     end
 
@@ -81,11 +81,11 @@ defmodule ApiCommons.Parameter.ConstraintTest do
     describe "&greater_or_equal_to/2" do
 
         test "Number does fulfill constraint" do
-            assert Constraint.greater_or_equal_to(12, 12)
+            assert {:ok, _} = Constraint.greater_or_equal_to(12, 12)
         end
 
         test "Number does not fullfill constraint" do
-            assert !Constraint.greater_or_equal_to(11, 12)
+            assert {:error, _} = Constraint.greater_or_equal_to(11, 12)
         end
     end
 
@@ -93,11 +93,27 @@ defmodule ApiCommons.Parameter.ConstraintTest do
     describe "&equal_to/2" do
 
         test "Number does fullfill constraint" do
-            assert Constraint.equal_to(12, 12)
+            assert {:ok, _} = Constraint.equal_to(12, 12)
         end
 
         test "Number does not fullfill constraint" do
-            assert !Constraint.equal_to(12.2, 12)
+            assert {:error, _} = Constraint.equal_to(12.2, 12)
+        end
+    end
+
+
+    describe "&required?/2" do
+
+        test "Value does fulfill constraint" do
+            assert {:ok, _} = Constraint.required?(12, true)
+            assert {:ok, _} = Constraint.required?("hey", true)
+            assert {:ok, _} = Constraint.required?(nil, false)
+            assert {:ok, _} = Constraint.required?("", false)
+        end
+
+        test "Value does not fulfill constraint" do
+            assert {:error, _} = Constraint.required?("", true)
+            assert {:error, _} = Constraint.required?(nil, true)
         end
     end
 

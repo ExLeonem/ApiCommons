@@ -21,11 +21,7 @@ defmodule ApiCommons.Request do
         data: %{},
         errors: %{},
         valid?: true,
-        parsed: %{
-            resource: nil,
-            pagination: nil,
-            filter: nil,
-        }
+        parsed: %{}
     ]
 
 
@@ -94,6 +90,19 @@ defmodule ApiCommons.Request do
         opts = %{}
         opts_merged = Map.merge(%{value: value}, opts)
 
+        request
+        |> put_error(name, code, opts)
+    end
+
+
+
+    def update(%Parameter{name: name, value: value, valid?: true}=param, request) do
+        request
+        |> put_parsed(name, value)
+    end
+
+
+    def update(%Parameter{name: name, error: code, opts: opts, valid?: false}, request) do
         request
         |> put_error(name, code, opts)
     end

@@ -239,7 +239,7 @@ defmodule ApiCommons.Parameter do
     ## Parameter
     * ':params' - Parameters received from the endpoints.
     * ':name' - The name of the parameter to return.
-    * ':position' - The position of the parameter, one of [:all, :body, :header, :query]
+    * ':position' - The position of the parameter, one of [:path, :body, :query, :header] # :header needs to implemented
 
     Returns `any() | nil`
     """
@@ -248,7 +248,7 @@ defmodule ApiCommons.Parameter do
 
     end
 
-    def get(params, name, position) when position in [:body, :header, :query] do
+    def get(params, name, position) when position in [:body, :path, :query] do
         param_map = Map.get(params, position)
         resolve_value(param_map, name)
     end
@@ -316,5 +316,12 @@ defmodule ApiCommons.Parameter do
     """
     @spec validate(Parameter.t()) :: Parameter.t()
     defp validate(param = %Parameter{valid?: false}), do: param
-    defp validate(param = %Parameter{name: name, value: value, type: type, opts: opts}), do: Constraint.validate(name, value, type, opts)
+    defp validate(param = %Parameter{name: name, value: value, type: type, opts: opts}) do
+
+        result = Constraint.validate(name, value, type, opts)
+        case result do
+            {:ok, value} -> param
+            {:error, code} -> %{param | error: code, valid?: false}
+        end
+    end
 end

@@ -1,20 +1,129 @@
-defmodule ApiCommons.Parameter.Schema do
-    
+defmodule ApiCommons.Schema do
+
     @moduledoc """
-    Resolve parameters passed to the endpoint.
+    Parses and validates parameters against a given Ecto.Schema.
+
+
     """
-   
+
+    import Plug.Conn
+
+    alias __MODULE__
     alias ApiCommons.Utils
     alias ApiCommons.Request
     alias ApiCommons.Parameter.Check
 
     @doc section: :resolve
+    @valid_options [:exclude, ]
+
+    defstruct [
+        :base,
+        data: %{},
+        opts: [],
+        error: [],
+        valid?: true
+    ]
 
 
-    def resolve(conn = %Plug.Conn{}) do
-        lib_data = Request.fetch(conn)
-        lib_data
+    @doc """
+    Check a given schema against some received parameters.
+
+
+    ## Parameters
+    * `conn` - A connection or ApiCommons.Request
+    * `schema` - The schema to check against
+    * `opts` - Additional options to be passed
+
+    ## Options
+    * `:changeset` - The changeset function to apply
+
+    """
+    def check(conn, schema, opts \\ [])
+    def check(conn = %Plug.Conn{}, schema, opts) do
+        conn
+        |> Request.from()
+        |> check(schema, opts)
     end
+
+    def check(request = %Request{}, schema, opts) when is_atom(schema) do
+        # Received a valid Ecto.Schema
+
+        is_module = Code.ensure_loaded?(schema)
+        is_schema = if is_module,
+            do: schema.__info__(:functions) |> Keyword.has_key?(:__schema__),
+            else: false
+
+        cond do
+            is_module && is_schema -> parse_schema(request, schema, opts)
+            true -> raise ArgumentError, message: "Exception in &check/3. Passed module is not a schema."
+        end
+    end
+
+    def check(_request, schema, _opts) when not is_atom(schema),
+        do: raise ArgumentError,
+            message: "Exception in ApiCommons.Schema. Can't process the given schema."
+
+    def check(_request, _schema, _opts),
+        do: raise ArgumentError,
+            message: "Exception in ApiCommons.Schema.check/3. Expected first parameter to be Plug.Conn or ApiCommons.Request."
+
+
+
+    defp parse_schema(request, schema, opts) do
+        # Schema is available
+        position = opts[:position]
+        data = get(request.data, position || :body)
+        fields = schema.__schema__(:fields)
+        # access field types with schema.__schema__(:type, :field_name)
+        # access field types with schema.__schema__(:association, :assoc_name) # For assoc
+        # Not null?
+
+        %Schema{base: schema, opts: opts}
+        |> cast(data)
+        # |> validate()
+    end
+
+
+    @doc """
+        Load and
+
+        Recursivly cast the received string parameters
+        to parameters of the given type.
+
+        Returns: Schema
+    """
+    def cast(schema = %Schema{base: base}, data) do
+        fields = base.__schema__(:fields)
+
+        parsed = %{}
+        result = for field <- fields, into: %{} do
+            type = get_field_type(base, field)
+
+            key = Utils.key_to_string(field)
+            result = Utils.cast(data[key], type)
+
+            {field, result}
+        end
+
+        associations = base.__schema__(:associations)
+        for association <- assocations, into: %{} do
+
+            {assocation, }
+        end
+
+        result
+    end
+
+
+    defp get_field_type(base, field), do: base.__schema__(:type, field)
+
+
+    defp get(params, position) when position in [:body, :path, :query] do
+        Map.get(params, position, %{})
+    end
+
+    defp get(_params, position), do: raise ArgumentError,
+        message: "Exception in ApiCommons.Schema.check/3. Can't access received parameters at position #{position}."
 
 
     @doc """
@@ -37,14 +146,14 @@ defmodule ApiCommons.Parameter.Schema do
     - [ ] Use Changeset to check perform additional checks?
 
     ## Parameters
-    - 
+    -
 
-    Returns: 
+    Returns:
     """
     defp fields([], checks), do: checks
     defp fields(field_names, checks = %Check{data: data, schema: ecto_schema, opts: opts}) when is_list(data) do
         schema_fields = ecto_schema.__schema__(:fields)
-        
+
         # TODO: extract keys, not nulls
         if length(schema_fields) <= 2 do
 
@@ -61,21 +170,21 @@ defmodule ApiCommons.Parameter.Schema do
         # Logger.info("Resolve field (#{field})")
         checks = cond do
             is_nil(data) -> %{checks | valid?: false, errors: :empty_data}
-            Utils.includes?(to_exclude, field) || !Map.has_key?(schema_changeset, field) -> 
+            Utils.includes?(to_exclude, field) || !Map.has_key?(schema_changeset, field) ->
                 %{checks| valid?: false}
-            true -> 
+            true ->
                 optional? = Utils.includes?(is_optional, field) || field in primary_key
                 field_type = ecto_schema.__schema__(:type, field)
 
                 value = data
-                    |> Map.get(to_string(field)) 
+                    |> Map.get(to_string(field))
                     |> Utils.cast(field_type)
 
                 Check.update(field, value, checks, optional?: optional?)
         end
 
         # Logger.info("Finish resolve field (#{field})")
-        fields(next_fields, checks) 
+        fields(next_fields, checks)
     end
 
 
@@ -131,12 +240,12 @@ defmodule ApiCommons.Parameter.Schema do
     - join (atom) The field used to join the two check structs
     """
     defp merge_assoc_checks(from_check, to_check, opts \\ %{}) do
-        
+
         # IO.inspect(from_check)
         # IO.inspect(to_check)
         from_parsed = Map.get(from_check, :parsed)
         cond do
-            from_check.valid? -> 
+            from_check.valid? ->
                 new_parsed = Map.put(to_check.parsed, opts[:join], from_parsed)
                 %{to_check | parsed: new_parsed}
             true ->
