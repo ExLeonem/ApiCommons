@@ -4,6 +4,7 @@ defmodule ApiCommons.Schema do
     Parses and validates parameters against a given Ecto.Schema.
 
 
+
     """
 
     import Plug.Conn
@@ -14,13 +15,14 @@ defmodule ApiCommons.Schema do
     alias ApiCommons.Parameter.Check
 
     @doc section: :resolve
-    @valid_options [:exclude, ]
+    @valid_options [:exclude, :validate]
+
 
     defstruct [
         :base,
         data: %{},
         opts: [],
-        error: [],
+        errors: [],
         valid?: true
     ]
 
@@ -35,17 +37,19 @@ defmodule ApiCommons.Schema do
     * `opts` - Additional options to be passed
 
     ## Options
-    * `:changeset` - The changeset function to apply
+    * `:exclude` - Fields to exclude in a specific schema.
+    * `:validate` - A changeset function to validate the parsed fields.
 
+    Returns: Request.t()
     """
-    def check(conn, schema, opts \\ [])
-    def check(conn = %Plug.Conn{}, schema, opts) do
+    def parse(conn, schema, opts \\ [])
+    def parse(conn = %Plug.Conn{}, schema, opts) do
         conn
         |> Request.from()
-        |> check(schema, opts)
+        |> parse(schema, opts)
     end
 
-    def check(request = %Request{}, schema, opts) when is_atom(schema) do
+    def parse(request = %Request{}, schema, opts) when is_atom(schema) do
         # Received a valid Ecto.Schema
 
         is_module = Code.ensure_loaded?(schema)
@@ -54,22 +58,24 @@ defmodule ApiCommons.Schema do
             else: false
 
         cond do
-            is_module && is_schema -> parse_schema(request, schema, opts)
-            true -> raise ArgumentError, message: "Exception in &check/3. Passed module is not a schema."
+            is_module && is_schema -> process_schema(request, schema, opts)
+            true -> raise ArgumentError, message: "Exception in &parse/3. Passed module is not a schema."
         end
     end
 
-    def check(_request, schema, _opts) when not is_atom(schema),
+    def parse(_request, schema, _opts) when not is_atom(schema),
         do: raise ArgumentError,
             message: "Exception in ApiCommons.Schema. Can't process the given schema."
 
-    def check(_request, _schema, _opts),
+    def parse(_request, _schema, _opts),
         do: raise ArgumentError,
-            message: "Exception in ApiCommons.Schema.check/3. Expected first parameter to be Plug.Conn or ApiCommons.Request."
+            message: "Exception in ApiCommons.Schema.parse/3. Expected first parameter to be Plug.Conn or ApiCommons.Request."
 
 
+    @doc """
 
-    defp parse_schema(request, schema, opts) do
+    """
+    defp process_schema(request, schema, opts) do
         # Schema is available
         position = opts[:position]
         data = get(request.data, position || :body)
@@ -79,8 +85,9 @@ defmodule ApiCommons.Schema do
         # Not null?
 
         %Schema{base: schema, opts: opts}
-        |> cast(data)
-        # |> validate()
+        |> _parse_received_params(data)
+        |> validate(request)
+        |> Request.update(request)
     end
 
 
@@ -92,74 +99,76 @@ defmodule ApiCommons.Schema do
 
         Returns: Schema
     """
-    def cast(schema = %Schema{base: base}, data) do
-        fields = base.__schema__(:fields)
+    defp _parse_received_params(schema = %Schema{base: base}, data) do
 
-        parsed = %{}
-        result = for field <- fields, into: %{} do
+        schema
+        |> parse_fields(data)
+        |> parse_assocs(data)
+    end
+
+
+    @doc """
+    Use schema to parse received values into
+    basic fields and cast into given types.
+
+    ## Parameter
+    * `schema` - The `Ecto.Schema` for which data has to be parsed.
+    * `data` - The collected data.
+
+    Returns: Schema.t()
+    """
+    defp parse_fields(schema = %Schema{base: base}, data) do
+
+        fields = base.__schema__(:fields)
+        parsed = for field <- fields, into: %{} do
             type = get_field_type(base, field)
 
             key = Utils.key_to_string(field)
             result = Utils.cast(data[key], type)
-
             {field, result}
         end
 
+        %{schema | data: parsed}
+    end
+
+
+    @doc """
+    Recursivly parses received values into associations of a schema.
+
+    Returns: Schema.t()
+    """
+    defp parse_assocs(schema = %Schema{base: base}, data) do
+
         associations = base.__schema__(:associations)
-        for association <- assocations, into: %{} do
+        res = for association <- associations, into: %{} do
 
-            {assocation, }
+            IO.inspect(association)
+            {association, nil}
         end
 
-        result
-    end
-
-
-    defp get_field_type(base, field), do: base.__schema__(:type, field)
-
-
-    defp get(params, position) when position in [:body, :path, :query] do
-        Map.get(params, position, %{})
-    end
-
-    defp get(_params, position), do: raise ArgumentError,
-        message: "Exception in ApiCommons.Schema.check/3. Can't access received parameters at position #{position}."
-
-
-    @doc """
-        Resolve fields of a schema
-
-        TODO: Use preload key to ignore all keys except id
-    """
-    def fields(checks = %Check{schema: ecto_schema}) do
-        # Collect parse regular fields of schema
-        ecto_schema.__schema__(:fields)
-        |> fields(checks)
+        %{schema | data: Map.merge(schema.data, res)}
     end
 
 
     @doc """
-    Read information about ecto schema fields.
+    Validate previously parsed data using a changeset.
 
-    # TODO
-    - [ ] Edge Case: list of values passed, list of maps passed
-    - [ ] Use Changeset to check perform additional checks?
-
-    ## Parameters
-    -
-
-    Returns:
+    Returns: Schema.t()
     """
-    defp fields([], checks), do: checks
-    defp fields(field_names, checks = %Check{data: data, schema: ecto_schema, opts: opts}) when is_list(data) do
-        schema_fields = ecto_schema.__schema__(:fields)
+    defp validate(%Schema{opts: opts} = schema, request) do
 
-        # TODO: extract keys, not nulls
-        if length(schema_fields) <= 2 do
+        has_validation? = Keyword.has_key?(opts, :validate)
 
+        if has_validation? do
+            validation = Keyword.get(opts, :validate)
+            result = validation.(schema, request)
+            result
+        else
+            schema
         end
-
     end
+
+
 
     defp fields([field | next_fields], checks = %Check{data: data, schema: ecto_schema, opts: opts}) do
         to_exclude = opts[:exclude]
@@ -185,16 +194,6 @@ defmodule ApiCommons.Schema do
 
         # Logger.info("Finish resolve field (#{field})")
         fields(next_fields, checks)
-    end
-
-
-    @doc """
-    Resolve an assocation to be included into a
-    """
-    def assocs(checks = %Check{schema: ecto_schema}) do
-        # Collect information from associated
-        ecto_schema.__schema__(:associations)
-        |> assocs(checks)
     end
 
 
@@ -255,4 +254,24 @@ defmodule ApiCommons.Schema do
                 %{to_check | valid?: false, errors: new_errors}
         end
     end
+
+
+
+    # ------------
+    # Utilities
+    # ---------------------
+
+    defp get_field_type(base, field), do: base.__schema__(:type, field)
+
+
+    @doc """
+    Get parameters from a set of
+
+    """
+    defp get(params, position) when position in [:body, :path, :query] do
+        Map.get(params, position, %{})
+    end
+
+    defp get(_params, position), do: raise ArgumentError,
+        message: "Exception in ApiCommons.Schema.check/3. Can't access received parameters at position #{position}."
 end

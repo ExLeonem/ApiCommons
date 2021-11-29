@@ -4,6 +4,7 @@ defmodule ApiCommons.Request do
     alias Plug.Conn.Unfetched
 
     alias __MODULE__
+    alias ApiCommons.Schema
     alias ApiCommons.Parameter
     alias ApiCommons.Parameter.Path
 
@@ -14,6 +15,7 @@ defmodule ApiCommons.Request do
         errors: map(),
         valid?: boolean(),
         parsed: map(),
+        tmp: map()
     }
 
     defstruct [
@@ -21,7 +23,8 @@ defmodule ApiCommons.Request do
         data: %{},
         errors: %{},
         valid?: true,
-        parsed: %{}
+        parsed: %{},
+        tmp: %{}
     ]
 
 
@@ -86,6 +89,7 @@ defmodule ApiCommons.Request do
 
     end
 
+
     def update({:error, name, value, code}, request = %Request{}) do
         opts = %{}
         opts_merged = Map.merge(%{value: value}, opts)
@@ -94,6 +98,15 @@ defmodule ApiCommons.Request do
         |> put_error(name, code, opts)
     end
 
+
+    def update(%Schema{base: base, data: data, valid?: true} = param, %Request{parsed: req_data} = request) do
+        %{request | parsed: Map.merge(req_data, Map.new(data))}
+    end
+
+
+    def update(%Schema{base: base, errors: errors, valid?: false} = param, %Request{errors: req_errors} = request) do
+        %{request | valid?: false, errors: Map.merge(req_errors, Map.new(errors))}
+    end
 
 
     def update(%Parameter{name: name, value: value, valid?: true}=param, request) do
@@ -106,6 +119,7 @@ defmodule ApiCommons.Request do
         request
         |> put_error(name, code, opts)
     end
+
 
 
 

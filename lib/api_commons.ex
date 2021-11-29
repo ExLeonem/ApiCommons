@@ -23,6 +23,17 @@ defmodule ApiCommons do
   end
 
 
+
+  @doc """
+  Validate previously parsed data using a changeset.
+
+  Returns: Schema.t()
+  """
+  def act(request, action_fn) do
+    action_fn.(request)
+  end
+
+
   @doc """
   Generate request encapsulating
   """
