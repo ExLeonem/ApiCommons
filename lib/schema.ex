@@ -268,9 +268,10 @@ defmodule ApiCommons.Schema do
     Get parameters from a set of
 
     """
-    defp get(params, position) when position in [:body, :path, :query] do
+    defp get(params, position) when position in [:body, :path, :query, :header] do
         Map.get(params, position, %{})
     end
+
 
     defp get(_params, position), do: raise ArgumentError,
         message: "Exception in ApiCommons.Schema.check/3. Can't access received parameters at position #{position}."

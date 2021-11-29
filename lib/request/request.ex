@@ -311,11 +311,11 @@ defmodule ApiCommons.Request do
         body_params = conn.body_params
         query_params = conn.query_params
         path_params = conn.path_params
-
         %{
             path: (if empty_params?(path_params), do: nil, else: path_params),
             body: (if empty_params?(body_params), do: nil, else: body_params),
-            query: (if empty_params?(query_params), do: nil, else: query_params)
+            query: (if empty_params?(query_params), do: nil, else: query_params),
+            header: Map.new(conn.req_headers)
         }
     end
 
