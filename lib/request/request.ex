@@ -25,6 +25,7 @@ defmodule ApiCommons.Request do
         valid?: true,
         parsed: %{},
         tmp: %{}
+        # render: %{} # Keep information to render in here? Eases call to 'render(conn, ...)'
     ]
 
 

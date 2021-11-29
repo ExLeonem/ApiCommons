@@ -3,5 +3,5 @@ use Mix.Config
 
 
 config :api_commons,
-  output: :json
+  output: :json,
   type: :rest

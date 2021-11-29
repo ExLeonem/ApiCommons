@@ -25,11 +25,21 @@ defmodule ApiCommons do
 
 
   @doc """
-  Validate previously parsed data using a changeset.
+  Performs an action on a request struct. Access all
+  fields of the request to perform some action.
+  The output value of the action function is returned.
 
-  Returns: Schema.t()
+  ## Parameter
+  * `request` - A request structure
+  * `action_fn` - A function with arity of 1. Receives the request to further process.
+  * `opts`- Additional options that can be passed.
+
+  ## Options
+  * `:skip` - `bool()` indicatin whether or not skip this action when request is invalid. (default=`false`)
+
+  Returns: any()
   """
-  def act(request, action_fn) do
+  def act(request, action_fn, opts \\ [skip: false]) do
     action_fn.(request)
   end
 

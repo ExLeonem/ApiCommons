@@ -107,11 +107,7 @@ defmodule ApiCommons.Parameter do
 
     def check(conn = %Request{}, parameter, opts) when is_map(parameter), do: like_map(conn, parameter, opts)
     def check(conn = %Request{}, parameter, opts) when is_atom(parameter) do
-        if Code.ensure_loaded?(parameter) do
-            like_schema(conn, parameter, opts)
-        else
-            single(conn, parameter, opts)
-        end
+        single(conn, parameter, opts)
     end
 
     def check(conn, parameter, opts) when not is_map(parameter) and not is_atom(parameter),
